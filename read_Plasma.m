@@ -41,12 +41,15 @@ function [f2] = read_Plasma(Plasma,nt,nx,ny,nz,outputDirectory)
         case 'up_mixed'
             fileName = '/c.up_mixed.dat';
             col=3;
+        case 'gradP'
+            fileName = '/c.gradP.dat';
+            col=3;
     end
     fileName = strcat(outputDirectory,fileName);
     [fid,~]=fopen(fileName,'r','n');
     
     if col~=1
-        f2=zeros(nt,nx,ny,nz,col);
+        f2=(zeros(nt,nx,ny,nz,col));
         for i=1:nt
             fread(fid,4,int);
             f=fread(fid,nx*ny*nz*col,real);
@@ -55,7 +58,7 @@ function [f2] = read_Plasma(Plasma,nt,nx,ny,nz,outputDirectory)
             f2(i,:,:,:,:)=f;
         end
     else
-        f2=zeros(nt,nx,ny,nz);
+        f2=(zeros(nt,nx,ny,nz));
         for i=1:nt
             fread(fid,4,int);
             f=fread(fid,nx*ny*nz,real);
