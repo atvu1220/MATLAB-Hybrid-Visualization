@@ -55,7 +55,7 @@ ylimits = [(nz-2)/2 - ddthickness (nz-2)/2 + ddthickness];
 xlimits = [30 80];
 filterNumber = 1;
 
-moverq=1.044e-8;
+moverq=1.0378e-8;
 fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/2d_Hybrid_Foreshock_currents_xyz_Run',RunNumber);
 v = VideoWriter(fileName);
 v.FrameRate= 1;
