@@ -1,10 +1,10 @@
 %Plots Position Data of particles
 clear all
 close all
-outputFolder = '180';
+outputFolder = '181';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
-RunNumber= '180';
+RunNumber= '181';
 int='int32';real='float32';
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
@@ -22,7 +22,7 @@ dt = 1.7296e-2/2;output = outputSteps;
 numproc = 100;
 col=3;
 nParticles = 500;
-nmax = 2000000;%250000;%3500000;
+nmax = 1600000;%2000000;%250000;%3500000;
 
 %Grid
 oneCelllength=101.649992187500/2;
@@ -31,7 +31,7 @@ xDir='ExB';
 yDir='B';
 
 %Desired Cell
-xSC = 110*[1,1,1,1,1,1,1];%%10+[20,40,60,80];
+xSC = 150*[1,1,1,1,1,1,1];%%10+[20,40,60,80];
 TDthickness = 2*3;
 FSbeamthickness = 100;
 % zSC = [nz/2 - TDthickness - FSbeamthickness/2 , nz/2, nz/2 + TDthickness + FSbeamthickness/2]-1;
@@ -442,7 +442,7 @@ plot_count=plot_count+1;
 %     title(strcat('Ion Velocity Distribution at t=',string(dt*t*outputSteps),' gyroperiods'),'FontSize',14);
 
     xlabel({xDir;'[M_A]'},'FontSize',12);
-    ylabel({yDir;'[M_A]'},'FontSize',12)
+    ylabel({'Bx(ExB)';'[M_A]'},'FontSize',12)
     box on
     
     ylim([-39 39])
