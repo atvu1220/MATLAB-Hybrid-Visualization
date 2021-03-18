@@ -13,7 +13,7 @@ elseif dir == "z"
     ParticleInCellVel(:,:,3);
 elseif dir == "B"
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
-    display('B loaded')
+%     display('B loaded')
     [Bxdata_interp] = imgaussfilt((interpolate_Data(Bdata,1,t,nx,nz,X,Z,X2,Z2)),filterNumber);
     [Bydata_interp] = imgaussfilt((interpolate_Data(Bdata,2,t,nx,nz,X,Z,X2,Z2)),filterNumber);
     [Bzdata_interp] = imgaussfilt((interpolate_Data(Bdata,3,t,nx,nz,X,Z,X2,Z2)),filterNumber);
@@ -39,9 +39,9 @@ elseif dir == "B"
 %     end
 elseif dir == "ExB"
     [up_cold_data] = read_Plasma('up_cold',nt,nx,ny,nz,outputDirectory);
-    display('u cold loaded')
+%     display('u cold loaded')
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
-    display('B loaded')
+%     display('B loaded')
     
     [Bxdata_interp] = imgaussfilt((interpolate_Data(Bdata,1,t,nx,nz,X,Z,X2,Z2)),filterNumber);
     [Bydata_interp] = imgaussfilt((interpolate_Data(Bdata,2,t,nx,nz,X,Z,X2,Z2)),filterNumber);
@@ -69,9 +69,9 @@ elseif dir == "ExB"
     
 elseif dir == "ExBperp"
     [up_cold_data] = read_Plasma('up_cold',nt,nx,ny,nz,outputDirectory);
-    display('u cold loaded')
+%     display('u cold loaded')
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
-    display('B loaded')
+%     display('B loaded')
     
     [Bxdata_interp] = imgaussfilt((interpolate_Data(Bdata,1,t,nx,nz,X,Z,X2,Z2)),filterNumber);
     [Bydata_interp] = imgaussfilt((interpolate_Data(Bdata,2,t,nx,nz,X,Z,X2,Z2)),filterNumber);

@@ -1,10 +1,10 @@
 %Plots Position Data of particles
 clear all
 close all
-outputFolder = '181';
+outputFolder = '184';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
-RunNumber= '181';
+RunNumber= '184';
 int='int32';real='float32';
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
@@ -22,7 +22,7 @@ dt = 1.7296e-2/2;output = outputSteps;
 numproc = 100;
 col=3;
 nParticles = 500;
-nmax = 1600000;%2000000;%250000;%3500000;
+nmax = 2000000%1600000;%2000000;%250000;%3500000;
 
 %Grid
 oneCelllength=101.649992187500/2;
@@ -31,7 +31,7 @@ xDir='ExB';
 yDir='B';
 
 %Desired Cell
-xSC = 150*[1,1,1,1,1,1,1];%%10+[20,40,60,80];
+xSC = 110*[1,1,1,1,1,1,1];%%10+[20,40,60,80];
 TDthickness = 2*3;
 FSbeamthickness = 100;
 % zSC = [nz/2 - TDthickness - FSbeamthickness/2 , nz/2, nz/2 + TDthickness + FSbeamthickness/2]-1;
@@ -198,7 +198,7 @@ fig = figure('Position',[ 1 1  400*length(xSC) 800]);
 colormap(A)
 set(gcf,'color','w');
 
-fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/2d_Hybrid_Foreshock_PaperFig4_',xDir,yDir,'_Run',RunNumber);%,'_x(',string(xSC),')_z(',string(zSC),')');
+fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/2d_Hybrid_Foreshock_PaperFig4_test_',xDir,yDir,'_Run',RunNumber);%,'_x(',string(xSC),')_z(',string(zSC),')');
 v = VideoWriter(fileName);v.FrameRate= 1;
 open(v);
 %Plotting distribution
@@ -228,6 +228,10 @@ h = sgtitle(sprintf('time = %2.2f gyroperiods',dt*t*outputSteps));
     yDir = 'B';
     [horComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,xDir,outputSteps,timeSteps,t,outputDirectory);
     [vertComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,yDir,outputSteps,timeSteps,t,outputDirectory);
+    yaxisHor = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],xDir,outputSteps,timeSteps,t,outputDirectory);
+    yaxisVert = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],yDir,outputSteps,timeSteps,t,outputDirectory);
+
+    
     %Determine components for distribution
 
     ParticleInCellVel = [horComp,vertComp];
@@ -260,6 +264,9 @@ h = sgtitle(sprintf('time = %2.2f gyroperiods',dt*t*outputSteps));
      Cphi(Cphi ==0) = NaN;
      axes(ha(plot_count));
     h = pcolor(X,Y,log(Cphi./Area)) ;
+    hold on
+    quiver(0,0,40*yaxisHor,40.*yaxisVert,'r','linewidth',3,'maxheadsize',0.5)
+    hold off
 %     h = pcolor(X,Y,Cphi) ;
     set(h, 'EdgeColor', 'none');
     myColorMap = parula(256); myColorMap(1,:) = 1;
@@ -339,6 +346,11 @@ h = sgtitle(sprintf('time = %2.2f gyroperiods',dt*t*outputSteps));
             
         end
         
+        %Draw Ydirection Arrow
+       
+        
+        
+        
     if SC ~=length(xSC)
         delete(c)
     elseif SC==length(xSC)
@@ -388,6 +400,9 @@ plot_count=plot_count+1;
     yDir = 'ExBperp';
     [horComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,xDir,outputSteps,timeSteps,t,outputDirectory);
     [vertComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,yDir,outputSteps,timeSteps,t,outputDirectory);
+    yaxisHor = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],xDir,outputSteps,timeSteps,t,outputDirectory);
+    yaxisVert = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],yDir,outputSteps,timeSteps,t,outputDirectory);
+    
     %Determine components for distribution
 
     ParticleInCellVel = [horComp,vertComp];
@@ -420,13 +435,16 @@ plot_count=plot_count+1;
 
     Cphi = (Cphi_cold+Cphi_mixed );%./sum(Cphi_cold+Cphi_mixed,'all');
     
-     Cphi(Cphi ==0) = NaN;
-     axes(ha(plot_count));
+    Cphi(Cphi ==0) = NaN;
+    axes(ha(plot_count));
     h = pcolor(X,Y,log(Cphi./Area)) ;
-%     h = pcolor(X,Y,Cphi) ;
+    hold on
+    quiver(0,0,40*yaxisHor,40.*yaxisVert,'r','linewidth',3,'maxheadsize',0.5)
+    hold off
+    %     h = pcolor(X,Y,Cphi) ;
     set(h, 'EdgeColor', 'none');
     myColorMap = parula(256); myColorMap(1,:) = 1;
-    colormap(myColorMap); 
+    colormap(myColorMap);
     plotsize = get(gca,'position');
     set(gca,'CLim',[-8 7])
     c = colorbar;

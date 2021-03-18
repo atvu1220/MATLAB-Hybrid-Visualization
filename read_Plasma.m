@@ -44,6 +44,16 @@ function [f2] = read_Plasma(Plasma,nt,nx,ny,nz,outputDirectory)
         case 'gradP'
             fileName = '/c.gradP.dat';
             col=3;
+        case 'temp_xyz'
+            fileName = '/c.tp.dat';
+            col=3;
+        case 'temp_cold_xyz'
+            fileName = '/c.tp_cold.dat';
+            col=3;
+        case 'temp_mixed_xyz'
+            fileName = '/c.tp_mixed.dat';
+            col=3;            
+
     end
     fileName = strcat(outputDirectory,fileName);
     [fid,~]=fopen(fileName,'r','n');
