@@ -1,15 +1,15 @@
 %Plots Position Data of particles
 clear all
 close all
-outputFolder = '194';
+outputFolder = '195';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
-RunNumber= '194';
+RunNumber= '195';
 int='int32';real='float32';
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
 % nt=5%floor(3596/10)
-timeSteps = 50;
+timeSteps = 500;
 outputSteps = 2*25;
 
 
@@ -81,10 +81,10 @@ vp_filenames(contains(vp_filenames,'**'))=[];
 %Create matrices for all n,x,v values
 % % % % % % procnum=length(xp_filenames);
 
-mixed=int8(zeros(nt,numproc,nmax,1));
-x=single(zeros(nt,numproc,nmax,2));
+mixed=int8(zeros(1,numproc,nmax,1));
+x=single(zeros(1,numproc,nmax,2));
 
-v=single(zeros(nt,numproc,nmax,3));
+v=single(zeros(1,numproc,nmax,3));
 
 for proc=2:numproc
 
@@ -113,7 +113,9 @@ for proc=2:numproc
 %         else
 %             nmax = 2000000;
 %         end
-        mixed(t,proc,:,1)=reshape(f,[nmax,1]);
+        if t ==nt 
+            mixed(1,proc,:,1)=reshape(f,[nmax,1]);
+        end
         clear f
             
         %Get x for each time step
@@ -122,7 +124,9 @@ for proc=2:numproc
         fread(fid1,1,int);
         f1= reshape(f,[nmax,3]);
         clear f
-        x(t,proc,:,:)=[f1(:,1),f1(:,3)];
+        if t ==nt
+            x(1,proc,:,:)=[f1(:,1),f1(:,3)];
+        end
         clear f1
         %f1 = [f;zeros(nmax - length(f),3)];
 %         x(t,proc,:,:)=f;
@@ -136,7 +140,9 @@ for proc=2:numproc
         fread(fid2,1,int);
         f2 = reshape(f,[nmax,3]);
         clear f
-        v(t,proc,:,:)=[f2(:,1),f2(:,2),f2(:,3)];%reshape(f,[nmax,3]);
+        if t==nt
+            v(1,proc,:,:)=[f2(:,1),f2(:,2),f2(:,3)];%reshape(f,[nmax,3]);
+        end
         %         f2 = [f;zeros(nmax - length(f),3)];
 %         clear f
         %         f2b = nonzeros(f2);
@@ -156,12 +162,12 @@ end
 %Array is (time,particle,
 %alln = sum(n,2);
 
-allv= reshape(v,[nt,numproc*nmax,3]);
+allv= reshape(v,[1,numproc*nmax,3]);
 clear v
 %allv = allvbeta(:,:,1:3);
-allx = reshape(x,[nt,numproc*nmax,2]);
+allx = reshape(x,[1,numproc*nmax,2]);
 clear x
-allmixed = reshape(mixed,[nt,numproc*nmax,1]);
+allmixed = reshape(mixed,[1,numproc*nmax,1]);
 clear mixed
 %allbeta = allvbeta(:,:,4);
 % alln = length(nonzeros(allv(:,:,1)));
@@ -185,7 +191,7 @@ xCellRange(i,:) = XX(2,xSC-neighboring:xSC+neighboring).*oneCelllength;
 zCellRange(i,:) = ZZ(zSC(i)-0*neighboring:zSC(i)+1,1).*oneCelllength;
 end
 
-
+nt
 
 
 plot_width = length(xSC);
@@ -199,10 +205,10 @@ colormap(A)
 set(gcf,'color','w');
 
 fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/2d_Hybrid_Foreshock_PaperFig4_test_',xDir,yDir,'_Run',RunNumber);%,'_x(',string(xSC),')_z(',string(zSC),')');
-v = VideoWriter(fileName);v.FrameRate= 1;
-open(v);
+% v = VideoWriter(fileName);v.FrameRate= 1;
+% open(v);
 %Plotting distribution
-for t=1:nt
+for t=nt:nt
     
   [ha,~] = tight_subplot(plot_height,plot_width,[-.385 0],0.0,0.05);
 % % % % % % % % % % % % % %       % %5Get Cell
@@ -215,14 +221,14 @@ h = sgtitle(sprintf('time = %2.2f gyroperiods',dt*t*outputSteps));
         plot_count=plot_count+1;
 %     plot2=subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
 
-    ParticleInCellVel = reshape(allv(t,allx(t,:,1) >= xCellRange(SC,1) & allx(t,:,1) <= xCellRange(SC,end) &...
-        allx(t,:,2) >= zCellRange(SC,1) & allx(t,:,2) <= zCellRange(SC,end),:) ,[],3) ;
-    ParticleInCellPos = reshape(allx(t,allx(t,:,1) >= xCellRange(SC,1) & allx(t,:,1) <= xCellRange(SC,end) &...
-        allx(t,:,2) >= zCellRange(SC,1) & allx(t,:,2) <= zCellRange(SC,end),:) ,[],2) ;
-    ParticleInCellMixed = allmixed(allx(t,:,1) >= xCellRange(SC,1) & allx(t,:,1) <= xCellRange(SC,end) &...
-        allx(t,:,2) >= zCellRange(SC,1) & allx(t,:,2) <= zCellRange(SC,end) ) ;
+    ParticleInCellVel = reshape(allv(1,allx(1,:,1) >= xCellRange(SC,1) & allx(1,:,1) <= xCellRange(SC,end) &...
+        allx(1,:,2) >= zCellRange(SC,1) & allx(1,:,2) <= zCellRange(SC,end),:) ,[],3) ;
+    ParticleInCellPos = reshape(allx(1,allx(1,:,1) >= xCellRange(SC,1) & allx(1,:,1) <= xCellRange(SC,end) &...
+        allx(1,:,2) >= zCellRange(SC,1) & allx(1,:,2) <= zCellRange(SC,end),:) ,[],2) ;
+    ParticleInCellMixed = allmixed(allx(1,:,1) >= xCellRange(SC,1) & allx(1,:,1) <= xCellRange(SC,end) &...
+        allx(1,:,2) >= zCellRange(SC,1) & allx(1,:,2) <= zCellRange(SC,end) ) ;
 
-    
+t    
 %%    %First Column
     xDir = 'ExB';
     yDir = 'B';
@@ -380,28 +386,28 @@ set(gca,'position',plotsize);
         
         %     plot2=subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
         
-        ParticleInCellVel = reshape(allv(t,allx(t,:,1) >= xCellRange(SC,1) & allx(t,:,1) <= xCellRange(SC,end) &...
-            allx(t,:,2) >= zCellRange(SC,1) & allx(t,:,2) <= zCellRange(SC,end),:) ,[],3) ;
-    ParticleInCellPos = reshape(allx(t,allx(t,:,1) >= xCellRange(SC,1) & allx(t,:,1) <= xCellRange(SC,end) &...
-        allx(t,:,2) >= zCellRange(SC,1) & allx(t,:,2) <= zCellRange(SC,end),:) ,[],2) ;
-    ParticleInCellMixed = allmixed(allx(t,:,1) >= xCellRange(SC,1) & allx(t,:,1) <= xCellRange(SC,end) &...
-        allx(t,:,2) >= zCellRange(SC,1) & allx(t,:,2) <= zCellRange(SC,end) ) ;
-    
-%% %Second Column
-plot_count=plot_count+1;
-    ParticleInCellVel = reshape(allv(t,allx(t,:,1) > xCellRange(SC,1) & allx(t,:,1) < xCellRange(SC,end) &...
-        allx(t,:,2) > zCellRange(SC,1) & allx(t,:,2) < zCellRange(SC,end),:) ,[],3) ;
-    ParticleInCellPos = reshape(allx(t,allx(t,:,1) > xCellRange(SC,1) & allx(t,:,1) < xCellRange(SC,end) &...
-        allx(t,:,2) > zCellRange(SC,1) & allx(t,:,2) < zCellRange(SC,end),:) ,[],2) ;
-    ParticleInCellMixed = allmixed(allx(t,:,1) > xCellRange(SC,1) & allx(t,:,1) < xCellRange(SC,end) &...
-        allx(t,:,2) > zCellRange(SC,1) & allx(t,:,2) < zCellRange(SC,end) ) ;
-
-    xDir = 'ExB';
-    yDir = 'ExBperp';
-    [horComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,xDir,outputSteps,timeSteps,t,outputDirectory);
-    [vertComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,yDir,outputSteps,timeSteps,t,outputDirectory);
-    yaxisHor = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],xDir,outputSteps,timeSteps,t,outputDirectory);
-    yaxisVert = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],yDir,outputSteps,timeSteps,t,outputDirectory);
+%         ParticleInCellVel = reshape(allv(1,allx(1,:,1) >= xCellRange(SC,1) & allx(1,:,1) <= xCellRange(SC,end) &...
+%             allx(1,:,2) >= zCellRange(SC,1) & allx(1,:,2) <= zCellRange(SC,end),:) ,[],3) ;
+%         ParticleInCellPos = reshape(allx(1,allx(1,:,1) >= xCellRange(SC,1) & allx(1,:,1) <= xCellRange(SC,end) &...
+%             allx(1,:,2) >= zCellRange(SC,1) & allx(1,:,2) <= zCellRange(SC,end),:) ,[],2) ;
+%         ParticleInCellMixed = allmixed(allx(1,:,1) >= xCellRange(SC,1) & allx(1,:,1) <= xCellRange(SC,end) &...
+%             allx(1,:,2) >= zCellRange(SC,1) & allx(1,:,2) <= zCellRange(SC,end) ) ;
+        
+        %% %Second Column
+        plot_count=plot_count+1;
+        ParticleInCellVel = reshape(allv(1,allx(1,:,1) > xCellRange(SC,1) & allx(1,:,1) < xCellRange(SC,end) &...
+            allx(1,:,2) > zCellRange(SC,1) & allx(1,:,2) < zCellRange(SC,end),:) ,[],3) ;
+        ParticleInCellPos = reshape(allx(1,allx(1,:,1) > xCellRange(SC,1) & allx(1,:,1) < xCellRange(SC,end) &...
+            allx(1,:,2) > zCellRange(SC,1) & allx(1,:,2) < zCellRange(SC,end),:) ,[],2) ;
+        ParticleInCellMixed = allmixed(allx(1,:,1) > xCellRange(SC,1) & allx(1,:,1) < xCellRange(SC,end) &...
+            allx(1,:,2) > zCellRange(SC,1) & allx(1,:,2) < zCellRange(SC,end) ) ;
+        
+        xDir = 'ExB';
+        yDir = 'ExBperp';
+        [horComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,xDir,outputSteps,timeSteps,t,outputDirectory);
+        [vertComp] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,yDir,outputSteps,timeSteps,t,outputDirectory);
+        yaxisHor = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],xDir,outputSteps,timeSteps,t,outputDirectory);
+        yaxisVert = calculateDistComponents([0,1,0],[xCellRange(SC,1),zCellRange(SC,1)],yDir,outputSteps,timeSteps,t,outputDirectory);
     
     %Determine components for distribution
 
@@ -551,8 +557,8 @@ plot_count=plot_count+1;
     
     print(gcf,'-dpng','-r300','-loose',fileNamePNG);
     
-    g(t) = getframe(gcf);
-    writeVideo(v,g(t));
+%     g(t) = getframe(gcf);
+%     writeVideo(v,g(t));
     delete(h)
     delete(ha)
 %     delete(plot1)
@@ -561,7 +567,7 @@ plot_count=plot_count+1;
     
 end
 
-close(v)
+% close(v)
 % clear all
 % close all
 function output_txt = getPcolorTime(obj,event_obj)

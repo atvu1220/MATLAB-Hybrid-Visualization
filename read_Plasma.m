@@ -52,7 +52,11 @@ function [f2] = read_Plasma(Plasma,nt,nx,ny,nz,outputDirectory)
             col=3;
         case 'temp_mixed_xyz'
             fileName = '/c.tp_mixed.dat';
+            col=3; 
+        case 'ue'
+            fileName = '/c.ue.dat';
             col=3;            
+            
 
     end
     fileName = strcat(outputDirectory,fileName);

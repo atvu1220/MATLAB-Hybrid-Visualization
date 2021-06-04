@@ -1,6 +1,6 @@
 function [component] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,dir,outputSteps,timeSteps,t,outputDirectory)
-t=10*t;%20*25=500 steps or 10*25 = 250 steps
-
+% t=10*t;%20*25=500 steps or 10*25 = 250 steps
+t=2*t; %2*25 stepoutput = a frame per 50 steps.
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
 nt=	floor(timeSteps/25);
@@ -13,10 +13,15 @@ elseif dir == "z"
     ParticleInCellVel(:,:,3);
 elseif dir == "B"
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
-%     display('B loaded')
+    Bdata = edge_to_center(Bdata);
+    
+    %     display('B loaded')
     [Bxdata_interp] = imgaussfilt((interpolate_Data(Bdata,1,t,nx,nz,X,Z,X2,Z2)),filterNumber);
     [Bydata_interp] = imgaussfilt((interpolate_Data(Bdata,2,t,nx,nz,X,Z,X2,Z2)),filterNumber);
     [Bzdata_interp] = imgaussfilt((interpolate_Data(Bdata,3,t,nx,nz,X,Z,X2,Z2)),filterNumber);
+    
+
+    
     component = [];
     for j=1:length(ParticleInCellPos(:,1))
         partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));
@@ -41,6 +46,8 @@ elseif dir == "ExB"
     [up_cold_data] = read_Plasma('up_cold',nt,nx,ny,nz,outputDirectory);
 %     display('u cold loaded')
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
+        Bdata = edge_to_center(Bdata);
+
 %     display('B loaded')
     
     [Bxdata_interp] = imgaussfilt((interpolate_Data(Bdata,1,t,nx,nz,X,Z,X2,Z2)),filterNumber);
@@ -71,6 +78,8 @@ elseif dir == "ExBperp"
     [up_cold_data] = read_Plasma('up_cold',nt,nx,ny,nz,outputDirectory);
 %     display('u cold loaded')
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
+        Bdata = edge_to_center(Bdata);
+
 %     display('B loaded')
     
     [Bxdata_interp] = imgaussfilt((interpolate_Data(Bdata,1,t,nx,nz,X,Z,X2,Z2)),filterNumber);
