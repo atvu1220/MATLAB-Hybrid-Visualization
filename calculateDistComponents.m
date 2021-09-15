@@ -6,11 +6,37 @@ t=2*t; %2*25 stepoutput = a frame per 50 steps.
 nt=	floor(timeSteps/25);
 filterNumber = 1;
 if dir == "x"
-    ParticleInCellVel(:,:,1);
+    component = [];
+    for j=1:length(ParticleInCellPos(:,1))
+        %partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));
+        [vpara,~] = calculate_components(1,0,0,...
+            ParticleInCellVel(j,1),ParticleInCellVel(j,2),ParticleInCellVel(j,3));
+        component = [component;vpara];
+    end
 elseif dir == "y"
-    ParticleInCellVel(:,:,2);
+    component = [];
+    for j=1:length(ParticleInCellPos(:,1))
+        %partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));
+%         if (ParticleInCellVel(j,1) + 20*48.95 ) < 1
+            [vpara,~] = calculate_components(0,1,0,...
+                ParticleInCellVel(j,1),ParticleInCellVel(j,2),ParticleInCellVel(j,3));
+%         else
+%             vpara = 0;
+%         end
+        component = [component;vpara];
+    end
 elseif dir == "z"
-    ParticleInCellVel(:,:,3);
+    component = [];
+    for j=1:length(ParticleInCellPos(:,1))
+        %partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));
+%         if (ParticleInCellVel(j,1) + 20*48.95 ) < 1
+            [vpara,~] = calculate_components(0,0,1,...
+                ParticleInCellVel(j,1),ParticleInCellVel(j,2),ParticleInCellVel(j,3));
+%         else
+%             vpara = 0;
+%         end
+        component = [component;vpara];
+    end
 elseif dir == "B"
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
     Bdata = edge_to_center(Bdata);

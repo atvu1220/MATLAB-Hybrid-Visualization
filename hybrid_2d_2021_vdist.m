@@ -1,44 +1,46 @@
 %Plots Position Data of particles
 clear all
 close all
-outputFolder = '153';
+outputFolder = '256';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
-RunNumber= '153';
+RunNumber= outputFolder;
 int='int32';real='float32';
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
 % nt=5%floor(3596/10)
-timeSteps = 3000;
-outputSteps = 20*25;
+timeSteps = 250;
+outputSteps = 10*25; %output steps,m, in maind.f90 for each frame of pos and vel data
 
 
 nt=	floor(timeSteps/outputSteps)
 nt_n = floor(timeSteps/outputSteps*20);
 va = 48.95; %km/s
-dt = 2*0.0041666; output = outputSteps;
-
+% dt = 2*0.0041666; 
+output = outputSteps;
+dt = 0.02;
 
 numproc = 100;
 col=3;
 nParticles = 100;
-nmax = 400000;%250000;%3500000;
+nmax = 2000000;%400000;%250000;%3500000;%number of particles Ni_max
+mixed_betaRatio = 1/50;
 
 %Grid
-oneCelllength=101.649992187500;
+oneCelllength=101.649992187500*0.5;
 [XX,ZZ] = meshgrid(0:1:nx-1,0:1:nz-1);
-xDir='ExB';
-yDir='ExBperp';
+xDir='y';
+yDir='z';
 
 %Desired Cell
-xSC = 60*[1,1,1,1,1];%%10+[20,40,60,80];
+xSC = 3*60*[1,1,1,1,1];%%10+[20,40,60,80];
 TDthickness = 3;
-FSbeamthickness = 100;
+FSbeamthickness = 190;
 % zSC = [nz/2 - TDthickness - FSbeamthickness/2 , nz/2, nz/2 + TDthickness + FSbeamthickness/2]-1;
 zSC = [nz/2 + 1*TDthickness,nz/2 - TDthickness ,nz/2 - 2*TDthickness, nz/2 - 4*TDthickness ]-1;
 % zSC = [nz/2 - TDthickness,nz/2 - TDthickness,nz/2 - TDthickness,nz/2 - TDthickness]
 % zSC = [nz/2 + 10, nz/2 + 20, nz/2 + 30, nz/2 + 40]
-zSC = [nz/2 + 2*TDthickness,nz/2 + 1*TDthickness ,nz/2 , nz/2 - 1*TDthickness, nz/2 - 2*TDthickness ]-1;
+zSC = -100+ [nz/2 + 2*TDthickness,nz/2 + 1*TDthickness ,nz/2 , nz/2 - 1*TDthickness, nz/2 - 2*TDthickness ]-1;
 
 neighboring = 1;
 
@@ -307,8 +309,8 @@ h = sgtitle(sprintf('time = %2.2f Gyroperiods',dt*t*outputSteps));
 %     thirdQuadrantsum
     %Vtheta(ParticleInCellVel(t,:,1) < 0) = -Vtheta(ParticleInCellVel(t,:,1) < 0);
     Cphi_cold = histcounts2(Vr(ParticleInCellMixed(:)==0),Vtheta(ParticleInCellMixed(:)==0),[rbins inf],[thetabins inf]);
-    Cphi_mixed = 1./200.*histcounts2(Vr(ParticleInCellMixed(:)==1),Vtheta(ParticleInCellMixed(:)==1),[rbins inf],[thetabins inf]);
-
+    Cphi_mixed = mixed_betaRatio.*histcounts2(Vr(ParticleInCellMixed(:)==1),Vtheta(ParticleInCellMixed(:)==1),[rbins inf],[thetabins inf]);
+    
     Cphi = (Cphi_cold+Cphi_mixed );%./sum(Cphi_cold+Cphi_mixed,'all');
     
      Cphi(Cphi ==0) = NaN;
@@ -334,11 +336,17 @@ h = sgtitle(sprintf('time = %2.2f Gyroperiods',dt*t*outputSteps));
     xlabel({xDir;'[M_A]'},'FontSize',12);
     ylabel({yDir;'[M_A]'},'FontSize',12)
     box on
-    
+%     
     ylim([-50 50])
     xlim([-50 50])
     xticks([-50-25:25:50-25])
     yticks([-50-25:25:50-25])
+%     
+%         ylim([-20 20])
+%     xlim([-20 20])
+%     xticks([-20:10:20])
+%     yticks([-20:10:20])
+%     
     axis square
     line([0 0],ylim,'Color','Black','linewidth',1)
     line(xlim,[0 0],'Color','Black','linewidth',1)
@@ -394,8 +402,8 @@ h = sgtitle(sprintf('time = %2.2f Gyroperiods',dt*t*outputSteps));
     %%
     g(t) = getframe(gcf);
     writeVideo(v,g(t));
-    delete(h)
-    delete(ha)
+% % % %     delete(h)
+% % % %     delete(ha)
 %     delete(plot1)
 %     delete(plot2)
     

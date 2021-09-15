@@ -1,0 +1,784 @@
+close all
+figure
+
+    plot_width= 1;
+plot_height= 10;
+plot_number = 1;
+
+%% Initial State
+[temp_cold_data_interp0] = interpolate_Data(temp_cold_data,1,1,nx,nz,X,Z,X2,Z2);
+temp_cold_data_interp0 = (temp_cold_data_interp0);
+t0 = mean(temp_cold_data_interp0(floor(nz-nz/4):nz-1,2:end-4),'all');
+t0 = imgaussfilt(t0,1);
+
+[n_cold_data_interp0] = interpolate_Data(n_cold_data,1,1,nx,nz,X,Z,X2,Z2);
+n_cold_data_interp0 = (n_cold_data_interp0);
+n0 = mean(n_cold_data_interp0(3:nz-3,2:end-4),'all');
+n0 = imgaussfilt(n0,1);
+
+E0 = (5e-9)/moverq* va;
+J0 = (5e-9)/ ((lambda_i));
+nv0 = (5e-9)/((4*pi*10^-7*(lambda_i)*10^3));
+B0 = 5e-9/moverq;
+
+[Exdata_interp0] = ((interpolate_Data(Edata,1,1,nx,nz,X,Z,X2,Z2)));
+[Eydata_interp0] = ((interpolate_Data(Edata,2,1,nx,nz,X,Z,X2,Z2)));
+[Eydata_interp0_y1] = ((interpolate_Data_y(Edata,2,1,nx,nz,X,Z,X2,Z2)));
+[Ezdata_interp0] = ((interpolate_Data(Edata,3,1,nx,nz,X,Z,X2,Z2)));
+
+% [gradPexdata_interp0] = ((interpolate_Data(gradPdata,1,1,nx,nz,X,Z,X2,Z2)));
+% [gradPeydata_interp0] = ((interpolate_Data(gradPdata,2,1,nx,nz,X,Z,X2,Z2)));
+% [gradPezdata_interp0] = ((interpolate_Data(gradPdata,3,1,nx,nz,X,Z,X2,Z2)));
+
+[Bxdata_interp0] = (interpolate_Data(Bdata,1,1,nx,nz,X,Z,X2,Z2));
+[Bxdata_interp0_y1] = (interpolate_Data_y(Bdata,1,1,nx,nz,X,Z,X2,Z2));
+
+[Bydata_interp0] = (interpolate_Data(Bdata,2,1,nx,nz,X,Z,X2,Z2));
+[Bydata_interp0_y1] = (interpolate_Data_y(Bdata,2,1,nx,nz,X,Z,X2,Z2));
+
+
+[Bzdata_interp0] = (interpolate_Data(Bdata,3,1,nx,nz,X,Z,X2,Z2));
+[Bzdata_interp0_y1] = (interpolate_Data(Bdata,3,1,nx,nz,X,Z,X2,Z2));
+
+[Btcxdata_interp0] = imgaussfilt((interpolate_Data(Btcdata,1,1,nx,nz,X,Z,X2,Z2)),filterNumber2);
+[Btcydata_interp0] = imgaussfilt((interpolate_Data(Btcdata,2,1,nx,nz,X,Z,X2,Z2)),filterNumber2);
+[Btczdata_interp0] = imgaussfilt((interpolate_Data(Btcdata,3,1,nx,nz,X,Z,X2,Z2)),filterNumber2);
+
+
+% ExBx0 =  (Eydata_interp0.*Bzdata_interp0-Ezdata_interp0.*Bydata_interp0)./(Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2);
+% ExBy0 = -(Exdata_interp0.*Bzdata_interp0-Ezdata_interp0.*Bxdata_interp0)./(Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2);
+% ExBz0 =  (Exdata_interp0.*Bydata_interp0-Eydata_interp0.*Bxdata_interp0)./(Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2);
+
+ExBx0 = (interpolate_Data(ExBdata,1,1,nx,nz,X,Z,X2,Z2))./(Btcxdata_interp0.^2 + Btcydata_interp0.^2 + Btczdata_interp0.^2);
+ExBy0 = (interpolate_Data(ExBdata,2,1,nx,nz,X,Z,X2,Z2))./(Btcxdata_interp0.^2 + Btcydata_interp0.^2 + Btczdata_interp0.^2);
+ExBz0 = (interpolate_Data(ExBdata,3,1,nx,nz,X,Z,X2,Z2))./(Btcxdata_interp0.^2 + Btcydata_interp0.^2 + Btczdata_interp0.^2);
+
+% ExBx0 = (interpolate_Data(ExBdata,1,1,nx,nz,X,Z,X2,Z2))./(Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2);
+% ExBy0 = (interpolate_Data(ExBdata,2,1,nx,nz,X,Z,X2,Z2))./(Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2);
+% ExBz0 = (interpolate_Data(ExBdata,3,1,nx,nz,X,Z,X2,Z2))./(Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2);
+
+
+
+%Parallel Speed
+upx_mixed_bulk = -2*MA*Bxdata_interp0 ./ (Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2).^(1/2);
+upy_mixed_bulk = -2*MA*Bydata_interp0 ./ (Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2).^(1/2);
+upz_mixed_bulk = -2*MA*Bzdata_interp0 ./ (Bxdata_interp0.^2 + Bydata_interp0.^2 + Bzdata_interp0.^2).^(1/2);
+
+for k=nz/2+1:nz
+    upx_mixed_bulk(k,:) = 0.0;%-2*FS_Ma*Bxdata_interp0(nz/2,:) ./ (Bxdata_interp0(nz/2,:).^2 + Bydata_interp0(nz/2,:).^2 + Bzdata_interp0(nz/2,:).^2).^(1/2);
+    upy_mixed_bulk(k,:) = 0.0;%-2*FS_Ma*Bydata_interp0(nz/2,:) ./ (Bxdata_interp0(nz/2,:).^2 + Bydata_interp0(nz/2,:).^2 + Bzdata_interp0(nz/2,:).^2).^(1/2);
+    upz_mixed_bulk(k,:) = 0.0;%-2*FS_Ma*Bzdata_interp0(nz/2,:) ./ (Bxdata_interp0(nz/2,:).^2 + Bydata_interp0(nz/2,:).^2 + Bzdata_interp0(nz/2,:).^2).^(1/2);
+end
+
+[upx_cold_data_interp0] = ((interpolate_Data(up_cold_data,1,1,nx,nz,X,Z,X2,Z2)));
+[upy_cold_data_interp0] = ((interpolate_Data(up_cold_data,2,1,nx,nz,X,Z,X2,Z2)));
+[upz_cold_data_interp0] = ((interpolate_Data(up_cold_data,3,1,nx,nz,X,Z,X2,Z2)));
+
+[upx_data_interp0] = ((interpolate_Data(up_data,1,1,nx,nz,X,Z,X2,Z2)));
+[upy_data_interp0] = ((interpolate_Data(up_data,2,1,nx,nz,X,Z,X2,Z2)));
+[upz_data_interp0] = ((interpolate_Data(up_data,3,1,nx,nz,X,Z,X2,Z2)));
+
+[ppx_cold_data_interp0] = n_cold_data_interp0.*(upx_cold_data_interp0);%-ele*uex_cold0);0.996.*
+[ppy_cold_data_interp0] = n_cold_data_interp0.*(upy_cold_data_interp0);%-ele*uey_cold0);0.996.*
+[ppz_cold_data_interp0] = n_cold_data_interp0.*(upz_cold_data_interp0);%-ele*uez_cold0);0.996.*
+
+[Jxdata_interp0] = (interpolate_Data(Jdata,1,1,nx,nz,X,Z,X2,Z2));%.*ndata_interp.*alpha;
+[Jydata_interp0] = (interpolate_Data(Jdata,2,1,nx,nz,X,Z,X2,Z2));%.*ndata_interp.*alpha;
+[Jzdata_interp0] = (interpolate_Data(Jdata,3,1,nx,nz,X,Z,X2,Z2));%.*ndata_interp.*alpha;
+
+% [curlBx_interp0,curlBy_interp0,curlBz_interp0] = calculate_curlB(Bxdata_interp0,Bxdata_interp0_y1,Bydata_interp0,Bydata_interp0_y1,Bzdata_interp0,Bzdata_interp0_y1,lambda_i,nx_min,nx_max,nz_min,nz_max);
+% 
+% curlBx_interp0 = [zeros(1,nx_max-nx_min+1);curlBx_interp0;zeros(1,nx_max-nx_min+1)];
+% curlBy_interp0 = [zeros(1,nx_max-nx_min+1);curlBy_interp0;zeros(1,nx_max-nx_min+1)];
+% curlBz_interp0 = [zeros(1,nx_max-nx_min+1);curlBz_interp0;zeros(1,nx_max-nx_min+1)];
+% 
+% curlBx_interp0 = [zeros(nz,1),curlBx_interp0,zeros(nz,1)];
+% curlBy_interp0 = [zeros(nz,1),curlBy_interp0,zeros(nz,1)];
+% curlBz_interp0 = [zeros(nz,1),curlBz_interp0,zeros(nz,1)];
+
+[ndata_interp0] = (interpolate_Data(ndata,1,1,nx,nz,X,Z,X2,Z2));
+[uxdata_interp0] = (interpolate_Data(udata,1,1,nx,nz,X,Z,X2,Z2));
+[uydata_interp0] = (interpolate_Data(udata,2,1,nx,nz,X,Z,X2,Z2));
+[uzdata_interp0] = (interpolate_Data(udata,3,1,nx,nz,X,Z,X2,Z2));
+
+uex_tot0 = uxdata_interp0 - Jxdata_interp0*moverq./ (1000*4*pi*10^-7 .* q .* ndata_interp0*10^-9)./1000;
+uey_tot0 = uydata_interp0 - Jydata_interp0*moverq./ (1000*4*pi*10^-7 .* q .* ndata_interp0*10^-9)./1000;
+uez_tot0 = uzdata_interp0 - Jzdata_interp0*moverq./ (1000*4*pi*10^-7 .* q .* ndata_interp0*10^-9)./1000;
+
+[uex_tot0] =- (interpolate_Data(uedata,1,1,nx,nz,X,Z,X2,Z2));
+[uey_tot0] = -(interpolate_Data(uedata,2,1,nx,nz,X,Z,X2,Z2));
+[uez_tot0] = -(interpolate_Data(uedata,3,1,nx,nz,X,Z,X2,Z2));
+
+
+
+[~,~,~,ueperpx0,ueperpy0,ueperpz0] = calculate_componentsVector(Btcxdata_interp0,Btcydata_interp0,Btczdata_interp0,uex_tot0,uey_tot0,uez_tot0);
+% [~,~,~,ueperpx0,ueperpy0,ueperpz0] = calculate_componentsVector(Bxdata_interp0,Bydata_interp0,Bzdata_interp0,uex_tot0,uey_tot0,uez_tot0);
+
+% B03 = (Btcxdata_interp0.^2 + Btcydata_interp0.^2 + Btczdata_interp0.^2).^(2/2);
+% [ueperpx0] = (interpolate_Data(uexBxBdata,1,1,nx,nz,X,Z,X2,Z2))./B03;
+% [ueperpy0] = (interpolate_Data(uexBxBdata,2,1,nx,nz,X,Z,X2,Z2))./B03;
+% [ueperpz0] = (interpolate_Data(uexBxBdata,3,1,nx,nz,X,Z,X2,Z2))./B03;
+
+% uexBx0 =  -(uey_tot0.*Bzdata_interp0-uez_tot0.*Bydata_interp0)./(va);
+% uexBy0 = (uex_tot0.*Bzdata_interp0-uez_tot0.*Bxdata_interp0)./(va);
+% uexBz0 =  -(uex_tot0.*Bydata_interp0-uey_tot0.*Bxdata_interp0)./(va);
+
+uexBx0 = interpolate_Data(uexBdata,1,1,nx,nz,X,Z,X2,Z2);
+uexBy0 = interpolate_Data(uexBdata,2,1,nx,nz,X,Z,X2,Z2);
+uexBz0 = interpolate_Data(uexBdata,3,1,nx,nz,X,Z,X2,Z2);
+
+pex_tot0 =  (ndata_interp0.*uex_tot0);
+pey_tot0 =  (ndata_interp0.*uey_tot0);
+pez_tot0 =  (ndata_interp0.*uez_tot0);
+
+    Eprimez0=Ezdata_interp0./E0 + (10*va.*Bydata_interp0-0.*Bxdata_interp0)./va./B0;
+
+
+for i=1:stepInterval:nt
+    i
+
+    [ha,~] = tight_subplot(plot_height,plot_width,[0.01 0.01],0.1,0.1);
+    h = sgtitle(sprintf('time = %2.2f gyroperiods at x=%3d',output*dt*double(i),xcut));
+    plot_number = 1;
+    axes_count = 1;
+    set(gcf,'color','w');
+    colormap(A)
+    
+    %% Data Interp
+    [n_cold_data_interp] = (interpolate_Data(n_cold_data,1,i,nx,nz,X,Z,X2,Z2));
+    [n_mixed_data_interp] = (interpolate_Data(n_mixed_data,1,i,nx,nz,X,Z,X2,Z2));
+ 
+    
+    %Electric Fields
+    [Exdata_interp] = ((interpolate_Data(Edata,1,i,nx,nz,X,Z,X2,Z2)));
+    [Eydata_interp] = ((interpolate_Data(Edata,2,i,nx,nz,X,Z,X2,Z2)));
+    [Eydata_interp_y1] = ((interpolate_Data_y(Edata,2,i,nx,nz,X,Z,X2,Z2)));
+    [Ezdata_interp] = ((interpolate_Data(Edata,3,i,nx,nz,X,Z,X2,Z2)));
+    
+    
+    %Div E
+    partialExdata_interp = (Exdata_interp(nz_min:nz_max,nx_min:nx_max)-Exdata_interp(nz_min:nz_max,nx_min-1:nx_max-1))./lambda_i;
+    partialEydata_interp = (Eydata_interp(nz_min:nz_max,nx_min:nx_max)-Eydata_interp_y1(nz_min:nz_max,nx_min:nx_max))./lambda_i;
+    partialEzdata_interp = (Ezdata_interp(nz_min:nz_max,nx_min:nx_max)-Ezdata_interp(nz_min-1:nz_max-1,nx_min:nx_max))./lambda_i;
+    divEdata_interp = (partialExdata_interp + partialEydata_interp + partialEzdata_interp)./(E0/lambda_i);
+    
+    
+    
+    %Delta Electric Fields
+    delta_Exdata_interp = (Exdata_interp-del*Exdata_interp0)./E0;
+    delta_Eydata_interp = (Eydata_interp-del*Eydata_interp0)./E0;
+    delta_Eydata_interp_y1 = (Eydata_interp_y1-Eydata_interp0_y1)./E0;
+    delta_Ezdata_interp = (Ezdata_interp-del*Ezdata_interp0)./E0;
+    
+    %Delta divE
+    partialdeltaExdata_interp = (delta_Exdata_interp(nz_min:nz_max,nx_min:nx_max)-del*delta_Exdata_interp(nz_min:nz_max,nx_min-1:nx_max-1))./lambda_i;
+    partialdeltaEydata_interp = (delta_Eydata_interp(nz_min:nz_max,nx_min:nx_max)-del*delta_Eydata_interp_y1(nz_min:nz_max,nx_min:nx_max))./lambda_i;
+    partialdeltaEzdata_interp = (delta_Ezdata_interp(nz_min:nz_max,nx_min:nx_max)-del*delta_Ezdata_interp(nz_min-1:nz_max-1,nx_min:nx_max))./lambda_i;
+    divdeltaEdata_interp = ((partialdeltaExdata_interp + partialdeltaEydata_interp + partialdeltaEzdata_interp)./(E0/lambda_i));
+    
+    
+    %Magnetic Fields
+    [Bxdata_interp] = (interpolate_Data(Bdata,1,i,nx,nz,X,Z,X2,Z2));
+    [Bxdata_interp_y1] = (interpolate_Data_y(Bdata,1,i,nx,nz,X,Z,X2,Z2));
+    [Bydata_interp] = ((interpolate_Data(Bdata,2,i,nx,nz,X,Z,X2,Z2)));
+    [Bydata_interp_y1] = ((interpolate_Data_y(Bdata,2,i,nx,nz,X,Z,X2,Z2)));
+    [Bzdata_interp] = ((interpolate_Data(Bdata,3,i,nx,nz,X,Z,X2,Z2)));
+    [Bzdata_interp_y1] = ((interpolate_Data(Bdata,3,i,nx,nz,X,Z,X2,Z2)));
+    
+    [Btcxdata_interp] = imgaussfilt((interpolate_Data(Btcdata,1,i,nx,nz,X,Z,X2,Z2)),filterNumber2);
+    [Btcydata_interp] = imgaussfilt((interpolate_Data(Btcdata,2,i,nx,nz,X,Z,X2,Z2)),filterNumber2);
+    [Btczdata_interp] = imgaussfilt((interpolate_Data(Btcdata,3,i,nx,nz,X,Z,X2,Z2)),filterNumber2);
+    
+    %Delta Magnetic Fields
+    delta_Bxdata_interp = Bxdata_interp - del*Bxdata_interp0;
+    delta_Bydata_interp = Bydata_interp - del*Bydata_interp0;
+    delta_Bzdata_interp = Bzdata_interp - del*Bzdata_interp0;
+    
+    %ExB
+%     ExBx =  (Eydata_interp.*Bzdata_interp-Ezdata_interp.*Bydata_interp)./(Bxdata_interp.^2 + Bydata_interp.^2 + Bzdata_interp.^2);
+%     ExBy = -(Exdata_interp.*Bzdata_interp-Ezdata_interp.*Bxdata_interp)./(Bxdata_interp.^2 + Bydata_interp.^2 + Bzdata_interp.^2);
+%     ExBz =  (Exdata_interp.*Bydata_interp-Eydata_interp.*Bxdata_interp)./(Bxdata_interp.^2 + Bydata_interp.^2 + Bzdata_interp.^2);
+    ExBx = (interpolate_Data(ExBdata,1,i,nx,nz,X,Z,X2,Z2))./(Btcxdata_interp.^2 + Btcydata_interp.^2 + Btczdata_interp.^2);
+    ExBy = (interpolate_Data(ExBdata,2,i,nx,nz,X,Z,X2,Z2))./(Btcxdata_interp.^2 + Btcydata_interp.^2 + Btczdata_interp.^2);
+    ExBz = (interpolate_Data(ExBdata,3,i,nx,nz,X,Z,X2,Z2))./(Btcxdata_interp.^2 + Btcydata_interp.^2 + Btczdata_interp.^2);
+
+%     ExBx = (interpolate_Data(ExBdata,1,i,nx,nz,X,Z,X2,Z2))./(Bxdata_interp.^2 + Bydata_interp.^2 + Bzdata_interp.^2);
+%     ExBy = (interpolate_Data(ExBdata,2,i,nx,nz,X,Z,X2,Z2))./(Bxdata_interp.^2 + Bydata_interp.^2 + Bzdata_interp.^2);
+%     ExBz = (interpolate_Data(ExBdata,3,i,nx,nz,X,Z,X2,Z2))./(Bxdata_interp.^2 + Bydata_interp.^2 + Bzdata_interp.^2);
+
+    %Delta ExB
+    delta_ExBx = (ExBx-del*ExBx0)./va;
+    delta_ExBy = (ExBy-del*ExBy0)./va;
+    delta_ExBz = (ExBz-del*ExBz0)./va;
+    
+    
+ 
+    %Proton moments
+    [ndata_interp]  = (interpolate_Data(ndata,1,i,nx,nz,X,Z,X2,Z2));
+    [uxdata_interp] = (interpolate_Data(udata,1,i,nx,nz,X,Z,X2,Z2));
+    [uydata_interp] = (interpolate_Data(udata,2,i,nx,nz,X,Z,X2,Z2));
+    [uzdata_interp] = (interpolate_Data(udata,3,i,nx,nz,X,Z,X2,Z2));
+    
+    %Total
+    [upx_data_interp] = ((interpolate_Data(up_data,1,i,nx,nz,X,Z,X2,Z2)));
+    [upy_data_interp] = ((interpolate_Data(up_data,2,i,nx,nz,X,Z,X2,Z2)));
+    [upz_data_interp] = ((interpolate_Data(up_data,3,i,nx,nz,X,Z,X2,Z2)));
+    
+    %Cold
+    upx_cold_data_interp = ((interpolate_Data(up_cold_data,1,i,nx,nz,X,Z,X2,Z2)));
+    upy_cold_data_interp = ((interpolate_Data(up_cold_data,2,i,nx,nz,X,Z,X2,Z2)));
+    upz_cold_data_interp = ((interpolate_Data(up_cold_data,3,i,nx,nz,X,Z,X2,Z2)));
+    
+    %Mixed
+    upx_mixed_data_interp = (interpolate_Data(up_mixed_data,1,i,nx,nz,X,Z,X2,Z2));
+    upy_mixed_data_interp = (interpolate_Data(up_mixed_data,2,i,nx,nz,X,Z,X2,Z2));
+    upz_mixed_data_interp = (interpolate_Data(up_mixed_data,3,i,nx,nz,X,Z,X2,Z2));
+    
+    %Currents
+    [Jxdata_interp] = (interpolate_Data(Jdata,1,i,nx,nz,X,Z,X2,Z2));
+    [Jydata_interp] = (interpolate_Data(Jdata,2,i,nx,nz,X,Z,X2,Z2));
+    [Jzdata_interp] = (interpolate_Data(Jdata,3,i,nx,nz,X,Z,X2,Z2));
+    
+    
+%     %Calculate curlB 
+%     [curlBx_interp,curlBy_interp,curlBz_interp] = calculate_curlB(Bxdata_interp,Bxdata_interp_y1,Bydata_interp,Bydata_interp_y1,Bzdata_interp,Bzdata_interp_y1,lambda_i,nx_min,nx_max,nz_min,nz_max);
+%     curlBx_interp = imgaussfilt(curlBx_interp,filterNumber);
+%     curlBy_interp = imgaussfilt(curlBy_interp,filterNumber);
+%     curlBz_interp = imgaussfilt(curlBz_interp,filterNumber);
+%     
+%     curlBx_interp = [zeros(1,nx_max-nx_min+1);curlBx_interp;zeros(1,nx_max-nx_min+1)];
+%     curlBy_interp = [zeros(1,nx_max-nx_min+1);curlBy_interp;zeros(1,nx_max-nx_min+1)];
+%     curlBz_interp = [zeros(1,nx_max-nx_min+1);curlBz_interp;zeros(1,nx_max-nx_min+1)];
+%     
+%     curlBx_interp = [zeros(nz,1),curlBx_interp,zeros(nz,1)];
+%     curlBy_interp = [zeros(nz,1),curlBy_interp,zeros(nz,1)];
+%     curlBz_interp = [zeros(nz,1),curlBz_interp,zeros(nz,1)];
+    
+
+%Electron Bulk Flow
+
+    
+    uex_tot = uxdata_interp - Jxdata_interp*moverq./ (1000*4*pi*10^-7 .* q .* ndata_interp*10^-9)./1000;
+    uey_tot = uydata_interp - Jydata_interp*moverq./ (1000*4*pi*10^-7 .* q .* ndata_interp*10^-9)./1000;
+    uez_tot = uzdata_interp - Jzdata_interp*moverq./ (1000*4*pi*10^-7 .* q .* ndata_interp*10^-9)./1000;
+    
+    [uex_tot] = -(interpolate_Data(uedata,1,i,nx,nz,X,Z,X2,Z2));
+    [uey_tot] = -(interpolate_Data(uedata,2,i,nx,nz,X,Z,X2,Z2));
+    [uez_tot] = -(interpolate_Data(uedata,3,i,nx,nz,X,Z,X2,Z2));
+%     
+
+    %Electron Bulk Momentum
+    pex_tot = (ndata_interp.*uex_tot);
+    pey_tot = (ndata_interp.*uey_tot);
+    pez_tot = (ndata_interp.*uez_tot);
+    
+    [electron_parax,electron_paray,electron_paraz,electron_perpx,electron_perpy,electron_perpz] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,pex_tot,pey_tot,pez_tot);
+    [electron_parax0,electron_paray0,electron_paraz0,electron_perpx0,electron_perpy0,electron_perpz0] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,pex_tot0,pey_tot0,pez_tot0);
+    
+    %Delta Electron Bulk Momentum Components
+    delta_electron_perpx = (electron_perpx-del*electron_perpx0).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_perpy = (electron_perpy-del*electron_perpy0).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_perpz = (electron_perpz-del*electron_perpz0).*10^3 * 10^-9.*-q./nv0;
+    
+    
+    %decomposition of electron bulk flow into cold and warm
+    %Cold Electron Momentum
+    pex_cold = n_cold_data_interp .* uex_tot;
+    pey_cold = n_cold_data_interp .* uey_tot;
+    pez_cold = n_cold_data_interp .* uez_tot;
+    pex_cold0 = n_cold_data_interp0 .* uex_tot0;
+    pey_cold0 = n_cold_data_interp0 .* uey_tot0;
+    pez_cold0 = n_cold_data_interp0 .* uez_tot0;
+    
+    [electron_parax_cold,electron_paray_cold,electron_paraz_cold,electron_perpx_cold,electron_perpy_cold,electron_perpz_cold] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,pex_cold,pey_cold,pez_cold);
+    [electron_parax_cold0,electron_paray_cold0,electron_paraz_cold0,electron_perpx_cold0,electron_perpy_cold0,electron_perpz_cold0] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,pex_cold0,pey_cold0,pez_cold0);
+    
+    delta_electron_perpx_cold = (electron_perpx_cold-del*electron_perpx_cold0).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_perpy_cold = (electron_perpy_cold-del*electron_perpy_cold0).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_perpz_cold = (electron_perpz_cold-del*electron_perpz_cold0).*10^3 * 10^-9.*-q./nv0;
+    
+    delta_electron_parax_cold = (electron_parax_cold-del*electron_parax_cold0).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_paray_cold = (electron_paray_cold-del*electron_paray_cold0).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_paraz_cold = (electron_paraz_cold-del*electron_paraz_cold0).*10^3 * 10^-9.*-q./nv0;
+    
+    %Mixed Electron Momentum
+    pex_mixed = n_mixed_data_interp .* uex_tot;
+    pey_mixed = n_mixed_data_interp .* uey_tot;
+    pez_mixed = n_mixed_data_interp .* uez_tot;
+
+
+    [electron_parax_mixed,electron_paray_mixed,electron_paraz_mixed,electron_perpx_mixed,electron_perpy_mixed,electron_perpz_mixed] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,pex_mixed,pey_mixed,pez_mixed);
+
+    delta_electron_perpx_mixed = (electron_perpx_mixed).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_perpy_mixed = (electron_perpy_mixed).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_perpz_mixed = (electron_perpz_mixed).*10^3 * 10^-9.*-q./nv0;
+    
+    delta_electron_parax_mixed = (electron_parax_mixed).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_paray_mixed = (electron_paray_mixed).*10^3 * 10^-9.*-q./nv0;
+    delta_electron_paraz_mixed = (electron_paraz_mixed).*10^3 * 10^-9.*-q./nv0;
+    
+    %E from uexB
+%     uexBx =  -(uey_tot.*Bzdata_interp-uez_tot.*Bydata_interp)./(va);
+%     uexBy = (uex_tot.*Bzdata_interp-uez_tot.*Bxdata_interp)./(va);
+%     uexBz =  -(uex_tot.*Bydata_interp-uey_tot.*Bxdata_interp)./(va);
+    uexBx = interpolate_Data(uexBdata,1,i,nx,nz,X,Z,X2,Z2);
+    uexBy = interpolate_Data(uexBdata,2,i,nx,nz,X,Z,X2,Z2);
+    uexBz = interpolate_Data(uexBdata,3,i,nx,nz,X,Z,X2,Z2);
+
+    delta_uexBx = (uexBx - del*uexBx0)./E0;
+    delta_uexBy = (uexBy - del*uexBy0)./E0;
+    delta_uexBz = (uexBz - del*uexBz0)./E0;
+    
+    %Delta Electron Bulk Flow
+    delta_uex_tot = uex_tot-del*uex_tot0;
+    delta_uey_tot = uey_tot-del*uey_tot0;
+    delta_uez_tot = uez_tot-del*uez_tot0;
+    
+    %ue perp
+
+    
+    [ueparax,ueparay,ueparaz,ueperpx,ueperpy,ueperpz] = calculate_componentsVector(Btcxdata_interp,Btcydata_interp,Btczdata_interp,uex_tot,uey_tot,uez_tot);
+    [ueparax0,ueparay0,ueparaz0,ueperpx0,ueperpy0,ueperpz0] = calculate_componentsVector(Btcxdata_interp,Btcydata_interp,Btczdata_interp,uex_tot0,uey_tot0,uez_tot0);
+
+    %     [~,~,~,ueperpx,ueperpy,ueperpz] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,uex_tot,uey_tot,uez_tot);
+%     B03 = (Btcxdata_interp.^2 + Btcydata_interp.^2 + Btczdata_interp.^2).^(2/2);
+%     [ueperpx] = (interpolate_Data(uexBxBdata,1,i,nx,nz,X,Z,X2,Z2))./B03;
+%     [ueperpy] = (interpolate_Data(uexBxBdata,2,i,nx,nz,X,Z,X2,Z2))./B03;
+%     [ueperpz] = (interpolate_Data(uexBxBdata,3,i,nx,nz,X,Z,X2,Z2))./B03;
+%     
+    
+    delta_ueperpx = (ueperpx - del*ueperpx0)./(va);
+    delta_ueperpy = (ueperpy - del*ueperpy0)./(va);
+    delta_ueperpz = (ueperpz - del*ueperpz0)./(va);
+    
+    delta_ueparax = (ueparax - del*ueparax0)./(va);
+    delta_ueparay = (ueparay - del*ueparay0)./(va);
+    delta_ueparaz = (ueparaz - del*ueparaz0)./(va);
+    
+    
+    %Delta Cold Flow
+    [upparax_cold,upparay_cold,upparaz_cold,upperpx_cold,upperpy_cold,upperpz_cold] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,upx_cold_data_interp,upy_cold_data_interp,upz_cold_data_interp);
+    [upparax_cold0,upparay_cold0,upparaz_cold0,upperpx_cold0,upperpy_cold0,upperpz_cold0] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,upx_cold_data_interp0,upy_cold_data_interp0,upz_cold_data_interp0);
+    
+    delta_upperpx_cold = upperpx_cold-del*upperpx_cold0;
+    delta_upperpy_cold = upperpy_cold-del*upperpy_cold0;
+    delta_upperpz_cold = upperpz_cold-del*upperpz_cold0;
+    
+    delta_upparax_cold = upparax_cold-del*upparax_cold0;
+    delta_upparay_cold = upparay_cold-del*upparay_cold0;
+    delta_upparaz_cold = upparaz_cold-del*upparaz_cold0;
+    
+    [ppx_cold_data_interp] = n_cold_data_interp.*(upx_cold_data_interp);
+    [ppy_cold_data_interp] = n_cold_data_interp.*(upy_cold_data_interp);
+    [ppz_cold_data_interp] = n_cold_data_interp.*(upz_cold_data_interp);
+    
+
+    
+    [cold_parax,cold_paray,cold_paraz,cold_perpx,cold_perpy,cold_perpz] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,ppx_cold_data_interp,ppy_cold_data_interp,ppz_cold_data_interp);
+    [cold_parax0,cold_paray0,cold_paraz0,cold_perpx0,cold_perpy0,cold_perpz0] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,ppx_cold_data_interp0,ppy_cold_data_interp0,ppz_cold_data_interp0);
+    
+    delta_cold_perpx = (cold_perpx-del*cold_perpx0).*10^3 * 10^-9.*q./nv0;
+    delta_cold_perpy = (cold_perpy-del*cold_perpy0).*10^3 * 10^-9.*q./nv0;
+    delta_cold_perpz = (cold_perpz-del*cold_perpz0).*10^3 * 10^-9.*q./nv0;
+    
+    delta_cold_parax = (cold_parax-del*cold_parax0).*10^3 * 10^-9.*q./nv0;
+    delta_cold_paray = (cold_paray-del*cold_paray0).*10^3 * 10^-9.*q./nv0;
+    delta_cold_paraz = (cold_paraz-del*cold_paraz0).*10^3 * 10^-9.*q./nv0;
+
+    %Delta Mixed Bulk Flow
+    [upparax_mixed,upparay_mixed,upparaz_mixed,upperpx_mixed,upperpy_mixed,upperpz_mixed] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,upx_mixed_data_interp,upy_mixed_data_interp,upz_mixed_data_interp);
+
+    delta_upperpx_mixed = upperpx_mixed;%.*(n_mixed_data_interp./n0 > nFS_threshold);
+    delta_upperpy_mixed = upperpy_mixed;%.*(n_mixed_data_interp./n0 > nFS_threshold);
+    delta_upperpz_mixed = upperpz_mixed;%.*(n_mixed_data_interp./n0 > nFS_threshold);
+    
+    delta_upparax_mixed = upparax_mixed;%.*(n_mixed_data_interp./n0 > nFS_threshold);
+    delta_upparay_mixed = upparay_mixed;%.*(n_mixed_data_interp./n0 > nFS_threshold);
+    delta_upparaz_mixed = upparaz_mixed;%.*(n_mixed_data_interp./n0 > nFS_threshold);
+    
+    [ppx_mixed_data_interp] = n_mixed_data_interp.*(upx_mixed_data_interp);%.*((n_mixed_data_interp./n0 > nFS_threshold));
+    [ppy_mixed_data_interp] = n_mixed_data_interp.*(upy_mixed_data_interp);%.*((n_mixed_data_interp./n0 > nFS_threshold));
+    [ppz_mixed_data_interp] = n_mixed_data_interp.*(upz_mixed_data_interp);%.*((n_mixed_data_interp./n0 > nFS_threshold));
+   
+    [mixed_parax,mixed_paray,mixed_paraz,mixed_perpx,mixed_perpy,mixed_perpz] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,ppx_mixed_data_interp,ppy_mixed_data_interp,ppz_mixed_data_interp);
+
+    delta_mixed_perpx = (mixed_perpx).*10^3 * 10^-9.*q./nv0;
+    delta_mixed_perpy = (mixed_perpy).*10^3 * 10^-9.*q./nv0;
+    delta_mixed_perpz = (mixed_perpz).*10^3 * 10^-9.*q./nv0;
+    
+    delta_mixed_parax = (mixed_parax).*10^3 * 10^-9.*q./nv0;
+    delta_mixed_paray = (mixed_paray).*10^3 * 10^-9.*q./nv0;
+    delta_mixed_paraz = (mixed_paraz).*10^3 * 10^-9.*q./nv0;
+    
+    %Current Decomp
+    [Jparax,Jparay,Jparaz,Jperpx,Jperpy,Jperpz] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,Jxdata_interp,Jydata_interp,Jzdata_interp);
+    [Jparax0,Jparay0,Jparaz0,Jperpx0,Jperpy0,Jperpz0] = calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,Jxdata_interp0,Jydata_interp0,Jzdata_interp0);
+    
+    delta_Jperpx = (Jperpx-del*Jperpx0).*moverq./J0;
+    delta_Jperpy = (Jperpy-del*Jperpy0).*moverq./J0;
+    delta_Jperpz = (Jperpz-del*Jperpz0).*moverq./J0;
+    
+    delta_Jparax = (Jparax-del*Jparax0).*moverq./J0;
+    delta_Jparay = (Jparay-del*Jparay0).*moverq./J0;
+    delta_Jparaz = (Jparaz-del*Jparaz0).*moverq./J0;
+    
+    %Calculate Totals
+    Jperpx_tot_woJd = delta_cold_perpx(2:end-1,2:end-1) + delta_mixed_perpx(2:end-1,2:end-1) + delta_electron_perpx_cold(2:end-1,2:end-1) + delta_electron_perpx_mixed(2:end-1,2:end-1);
+    Jperpy_tot_woJd = delta_cold_perpy(2:end-1,2:end-1) + delta_mixed_perpy(2:end-1,2:end-1) + delta_electron_perpy_cold(2:end-1,2:end-1) + delta_electron_perpy_mixed(2:end-1,2:end-1);
+    
+    Jparax_tot_woJd = delta_cold_parax(2:end-1,2:end-1) + delta_mixed_parax(2:end-1,2:end-1) + delta_electron_parax_cold(2:end-1,2:end-1) + delta_electron_parax_mixed(2:end-1,2:end-1);
+    Jparay_tot_woJd = delta_cold_paray(2:end-1,2:end-1) + delta_mixed_paray(2:end-1,2:end-1) + delta_electron_paray_cold(2:end-1,2:end-1) + delta_electron_paray_mixed(2:end-1,2:end-1);
+    
+    
+    Jperpx_cold = delta_cold_perpx(2:end-1,2:end-1) + delta_electron_perpx_cold(2:end-1,2:end-1);
+    Jperpx_mixed = delta_mixed_perpx(2:end-1,2:end-1) + delta_electron_perpx_mixed(2:end-1,2:end-1);
+    
+    Jparax_cold = delta_cold_parax(2:end-1,2:end-1) + delta_electron_parax_cold(2:end-1,2:end-1);
+    Jparax_mixed = delta_mixed_parax(2:end-1,2:end-1) + delta_electron_parax_mixed(2:end-1,2:end-1);
+    
+    Jperpy_cold = delta_cold_perpy(2:end-1,2:end-1) + delta_electron_perpy_cold(2:end-1,2:end-1);
+    Jperpy_mixed = delta_mixed_perpy(2:end-1,2:end-1) + delta_electron_perpy_mixed(2:end-1,2:end-1);
+    
+    Jperpz_mixed = delta_mixed_perpz(2:end-1,2:end-1) + delta_electron_perpz_mixed(2:end-1,2:end-1);
+
+    
+    Jparay_cold = delta_cold_paray(2:end-1,2:end-1) + delta_electron_paray_cold(2:end-1,2:end-1);
+    Jparay_mixed = delta_mixed_paray(2:end-1,2:end-1) + delta_electron_paray_mixed(2:end-1,2:end-1);
+    
+    delta_Jperpx_minus_delta_electron_perpx = delta_Jperpx;%- delta_electron_perpx;
+    delta_Jperpy_minus_delta_electron_perpy = delta_Jperpy;%- delta_electron_perpy;
+    
+    delta_Jparax_minus_delta_electron_parax = delta_Jparax;%- delta_electron_perpx;
+    delta_Jparay_minus_delta_electron_paray = delta_Jparay;%- delta_electron_perpy;
+    
+%     %bulk flow check
+%     uswx = n_cold_data_interp.*upx_cold_data_interp-n_cold_data_interp0.*upx_cold_data_interp0;
+%     uswy = n_cold_data_interp.*upy_cold_data_interp-n_cold_data_interp0.*upy_cold_data_interp0;
+%     uswz = n_cold_data_interp.*upz_cold_data_interp-n_cold_data_interp0.*upz_cold_data_interp0;
+%     
+%     ufsx = n_mixed_data_interp.*upx_mixed_data_interp;
+%     ufsy = n_mixed_data_interp.*upy_mixed_data_interp;
+%     ufsz = n_mixed_data_interp.*upz_mixed_data_interp;
+%     
+%     usumx = uswx + ufsx;
+%     usumy = uswy + ufsy;
+%     usumz = uswz + ufsz;
+%     
+%     utotx = ndata_interp.*uxdata_interp-ndata_interp0.*uxdata_interp0;
+%     utoty = ndata_interp.*uydata_interp-ndata_interp0.*uydata_interp0;
+%     utotz = ndata_interp.*uzdata_interp-ndata_interp0.*uzdata_interp0;
+%     
+%     udiffx = (utotx-usumx)./utotx;
+%     udiffy = (utoty-usumy)./utoty;
+%     udiffz = (utotz-usumz)./utotz;
+
+
+%JdotE
+    Jx_cold = ppx_cold_data_interp-pex_cold;
+    Jx_cold0 = ppx_cold_data_interp0+pex_cold0;
+    
+    Jy_cold = ppy_cold_data_interp-pey_cold;
+    Jy_cold0 = ppy_cold_data_interp0+pey_cold0;
+    
+    Jz_cold = ppz_cold_data_interp-pez_cold;
+    Jz_cold0 = ppz_cold_data_interp0+pez_cold0;
+    
+    delta_Jx_cold = (Jx_cold-Jx_cold0).*10^3 * 10^-9.*q./nv0;
+    delta_Jy_cold = (Jy_cold-Jy_cold0).*10^3 * 10^-9.*q./nv0;
+    delta_Jz_cold = (Jz_cold-Jz_cold0).*10^3 * 10^-9.*q./nv0;
+    
+    delta_Jx_mixed = (ppx_mixed_data_interp-pex_mixed).*10^3 * 10^-9.*q./nv0;
+    delta_Jy_mixed = (ppy_mixed_data_interp-pey_mixed).*10^3 * 10^-9.*q./nv0;
+    delta_Jz_mixed = (ppz_mixed_data_interp-pez_mixed).*10^3 * 10^-9.*q./nv0;
+    
+    JdotE_cold = delta_Jx_cold.*delta_Exdata_interp + delta_Jy_cold.*delta_Eydata_interp + delta_Jz_cold.*delta_Ezdata_interp;
+    JdotE_mixed = delta_Jx_mixed.*delta_Exdata_interp + delta_Jy_mixed.*delta_Eydata_interp + delta_Jz_mixed.*delta_Ezdata_interp;
+    
+    %Delta up
+    delta_upx = upx_data_interp-upx_data_interp0;
+    delta_upy = upy_data_interp-upy_data_interp0;
+    delta_upz = upz_data_interp-upz_data_interp0;
+    %% Plotting
+    %Smoothing
+    n_cold_data_interp_plot = imgaussfilt(n_cold_data_interp,filterNumbern);
+    n_cold_data_interp0_plot = imgaussfilt(n_cold_data_interp0,filterNumbern);
+    n_mixed_data_interp_plot = imgaussfilt(n_mixed_data_interp,filterNumbern);
+    
+    %plot ux,uy,uz of SW, FS
+    axes(ha(axes_count));axes_count=axes_count+1;
+     yyaxis left
+    plot(smooth(upx_cold_data_interp(:,xcut)-upx_cold_data_interp0(:,xcut))./va,'-b','linewidth',1);     hold on
+    plot(smooth(upy_cold_data_interp(:,xcut)-upy_cold_data_interp0(:,xcut))./va,'-g','linewidth',1);
+
+   yyaxis right
+    plot(smooth(upz_cold_data_interp(:,xcut)-upz_cold_data_interp0(:,xcut))./va,'-r','linewidth',1); 
+        Alabel = ylabel({'\Deltau_{sw,z}/va'},'FontSize',14);
+
+        set(gca,'ycolor','k')
+        yyaxis left
+        set(gca,'ycolor','k')
+    Alabel = ylabel({'\Deltau_{sw,xy}/va'},'FontSize',14);
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Alegend = legend('x','y','z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+    
+%     yyaxis right
+    axes(ha(axes_count));axes_count=axes_count+1;
+     yyaxis left
+    plot(smooth(upx_mixed_data_interp(:,xcut))./va,'-b','linewidth',1);
+     yyaxis right
+    
+    plot(smooth(upy_mixed_data_interp(:,xcut))./va,'-g','linewidth',1); hold on
+    plot(smooth(upz_mixed_data_interp(:,xcut))./va,'-r','linewidth',1);
+        Glabel = ylabel({'u_{fs,yz}/va'},'FontSize',14);
+
+     set(gca,'ycolor','k')
+     yyaxis left
+        set(gca,'ycolor','k')
+
+    Glabel = ylabel({'u_{fs,x}/va'},'FontSize',14);
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Glegend = legend('x','y','z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+
+
+    %Jperpx,y,z of FS
+    axes(ha(axes_count));axes_count=axes_count+1;
+    plot(smooth(Jperpx_mixed(:,xcut)),'-b','linewidth',1); hold on
+    plot(smooth(Jperpy_mixed(:,xcut)),'-g','linewidth',1);
+    plot(smooth(Jperpz_mixed(:,xcut)),'-r','linewidth',1);
+    
+    set(gca,'ycolor','k')
+    Blabel=ylabel({'J_{fs\perp}/J0'},'FontSize',14);
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Blegend = legend('J_x','J_y','J_z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+    
+    
+     
+    %Delta Jfs dot DeltaE
+    Eprimex=Exdata_interp./E0 + (0.*Bzdata_interp-0.*Bydata_interp)./va./B0;
+    Eprimey=Eydata_interp./E0 + (0.*Bxdata_interp-10*va.*Bzdata_interp)./va./B0;
+    Eprimez=Ezdata_interp./E0 + (10*va.*Bydata_interp-0.*Bxdata_interp)./va./B0-Eprimez0;
+    axes(ha(axes_count));axes_count=axes_count+1;
+%     plot(smooth(delta_Jx_mixed(:,xcut).*delta_Exdata_interp(:,xcut)),'-b','linewidth',1); hold on
+%     plot(smooth(delta_Jy_mixed(:,xcut).*delta_Eydata_interp(:,xcut)),'-g','linewidth',1);
+%     plot(smooth(delta_Jz_mixed(:,xcut).*delta_Ezdata_interp(:,xcut)),'-r','linewidth',1);
+    plot(smooth(delta_Jx_mixed(:,xcut).*Eprimex(:,xcut)),'-b','linewidth',1); hold on
+    plot(smooth(delta_Jy_mixed(:,xcut).*Eprimey(:,xcut)),'-g','linewidth',1);
+    plot(smooth(delta_Jz_mixed(:,xcut).*Eprimez(:,xcut)),'-r','linewidth',1);
+    
+    set(gca,'ycolor','k')
+    Clabel = ylabel({'J_{fs,tot}\cdotE/(J0E0)'},'FontSize',14);
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Clegend = legend('Jx\cdotEx','Jy\cdotEy','Jz\cdotEz','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff');
+    
+    
+    %Hall term, \Delta Jtot  x \Delta B / n0q , \Delta E
+    %    delta_Jx_mixed = (ppx_mixed_data_interp+pex_mixed).*10^3 * 10^-9.*q./nv0;
+
+    axes(ha(axes_count));axes_count=axes_count+1;
+%     Jptotx = (delta_Jx_cold+delta_Jx_mixed)./(n_cold_data_interp-n_cold_data_interp0+n_mixed_data_interp)./(10^-9*10^3)./q*nv0;
+%     Jptoty = (delta_Jy_cold+delta_Jy_mixed)./(n_cold_data_interp-n_cold_data_interp0+n_mixed_data_interp)./(10^-9)./q;
+%     Jptotz = (delta_Jz_cold+delta_Jz_mixed)./(n_cold_data_interp-n_cold_data_interp0+n_mixed_data_interp)./(10^-9)./q;
+%     
+
+    Jx_cold = ppx_cold_data_interp-pex_cold;
+    Jx_cold0 = ppx_cold_data_interp0-pex_cold0;
+    
+    Jy_cold = ppy_cold_data_interp-pey_cold;
+    Jy_cold0 = ppy_cold_data_interp0+pey_cold0;
+    
+    Jz_cold = ppz_cold_data_interp-pez_cold;
+    Jz_cold0 = ppz_cold_data_interp0-pez_cold0;
+%     
+    delta_Jx_cold = (Jx_cold-0*Jx_cold0).*10^3 * 10^-9.*q./nv0;
+    delta_Jy_cold = (Jy_cold-0*Jy_cold0).*10^3 * 10^-9.*q./nv0;
+    delta_Jz_cold = (Jz_cold-0*Jz_cold0).*10^3 * 10^-9.*q./nv0;
+%     
+    delta_Jx_mixed = (ppx_mixed_data_interp-pex_mixed).*10^3 * 10^-9.*q./nv0;
+    delta_Jy_mixed = (ppy_mixed_data_interp-pey_mixed).*10^3 * 10^-9.*q./nv0;
+    delta_Jz_mixed = (ppz_mixed_data_interp-pez_mixed).*10^3 * 10^-9.*q./nv0;
+    
+
+
+%     Jptotx = (delta_Jx_cold+delta_Jx_mixed)./(ndata_interp)./(10^-9*10^3)./q*nv0./va;
+%     Jptoty = (delta_Jy_cold+delta_Jy_mixed)./(ndata_interp)./(10^-9*10^3)./q*nv0./va;
+%     Jptotz = (delta_Jz_cold+delta_Jz_mixed)./(ndata_interp)./(10^-9*10^3)./q*nv0./va;
+    
+    
+%     JtotxBx = Jptoty.*delta_Bzdata_interp./B0 - Jptotz.*delta_Bydata_interp./B0;
+%     JtotxBy = Jptotz.*delta_Bxdata_interp./B0 - Jptotx.*delta_Bzdata_interp./B0;
+%     JtotxBz = Jptotx.*delta_Bydata_interp./B0 - Jptoty.*delta_Bxdata_interp./B0;
+
+    JtotxBx = (upy_data_interp-uey_tot).*Bzdata_interp./B0./va - (upz_data_interp-uez_tot).*Bydata_interp./B0./va;
+    JtotxBy = (upz_data_interp-uez_tot).*Bxdata_interp./B0./va - (upx_data_interp-uex_tot).*Bzdata_interp./B0./va;
+    JtotxBz = (upx_data_interp-uex_tot).*Bydata_interp./B0./va - (upy_data_interp-uey_tot).*Bxdata_interp./B0./va;
+    
+    
+    plot(smooth(JtotxBx(:,xcut)),'-b','linewidth',1); hold on
+    plot(smooth(JtotxBy(:,xcut)),'-g','linewidth',1);
+    plot(smooth(JtotxBz(:,xcut)),'-r','linewidth',1);
+
+    set(gca,'ycolor','k')
+    Dlabel = ylabel({'J_{tot}xB';'/(n0qB0va)'},'FontSize',14);    
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Dlegend = legend('x','y','z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff');
+    
+    %\Delta E
+    axes(ha(axes_count));axes_count=axes_count+1;
+%     plot(smooth(delta_Exdata_interp(:,xcut)),'-b','linewidth',1); hold on
+%     plot(smooth(delta_Eydata_interp(:,xcut)),'-g','linewidth',1);
+%     plot(smooth(delta_Ezdata_interp(:,xcut)),'-r','linewidth',1);
+ 
+    plot(smooth(Exdata_interp(:,xcut)./E0),'-b','linewidth',1); hold on
+    plot(smooth(Eydata_interp(:,xcut)./E0),'-g','linewidth',1);
+    plot(smooth(Ezdata_interp(:,xcut)./E0),'-r','linewidth',1);
+    
+    set(gca,'ycolor','k')
+    Flabel = ylabel({'\DeltaE/E0'},'FontSize',14);
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Flegend = legend('x','y','z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+
+    
+    %Delta E in SW Frame
+    Eprimex=Exdata_interp./E0 + (0.*Bzdata_interp-0.*Bydata_interp)./va./B0;
+    Eprimey=Eydata_interp./E0 + (0.*Bxdata_interp-10*va.*Bzdata_interp)./va./B0;
+    Eprimez=Ezdata_interp./E0 + (10*va.*Bydata_interp-0.*Bxdata_interp)./va./B0-Eprimez0;
+    axes(ha(axes_count));axes_count=axes_count+1;
+    plot(smooth(Eprimex(:,xcut)),'-b','linewidth',1); hold on
+    plot(smooth(Eprimey(:,xcut)),'-g','linewidth',1);
+    plot(smooth(Eprimez(:,xcut)),'-r','linewidth',1);
+ 
+    set(gca,'ycolor','k')
+    Flabel = ylabel("E'/E0",'FontSize',14);
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'xticklabel',[])
+    Flegend = legend('x','y','z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+    
+    
+%     %VixB and VexB
+     axes(ha(axes_count));axes_count=axes_count+1;
+% %     yyaxis left
+%     UixBx =  -  (upy_data_interp)./va.*Bzdata_interp./B0 - (upz_data_interp)./va.*Bydata_interp./B0;
+%     UixBy = +( (upx_data_interp)./va.*Bzdata_interp./B0 - (upz_data_interp)./va.*Bxdata_interp./B0 );
+%     UixBz =    -(upx_data_interp)./va.*Bydata_interp./B0 - (upy_data_interp)./va.*Bxdata_interp./B0;
+%     
+    UixBx = -   ((upy_data_interp-0    )./va.*Bzdata_interp./B0 - (upz_data_interp-0)./va.*Bydata_interp./B0);
+    UixBy = +(  (upx_data_interp-10*va)./va.*Bzdata_interp./B0 - (upz_data_interp-0)./va.*Bxdata_interp./B0 );
+    UixBz = -  ( (upx_data_interp-10*va)./va.*Bydata_interp./B0 - (upy_data_interp-0)./va.*Bxdata_interp./B0);
+%     [UexBx,UexBy,UexBz] =crossmat(uex_tot,uey_tot,uez_tot,Bxdata_interp,Bydata_interp,Bzdata_interp);
+    
+        
+    UexBx = -   ((uey_tot-0    )./va.*Bzdata_interp./B0 - (uez_tot-0)./va.*Bydata_interp./B0);
+    UexBy = +(  (uex_tot-10*va)./va.*Bzdata_interp./B0 - (uez_tot-0)./va.*Bxdata_interp./B0 );
+    UexBz = -   ((uex_tot-10*va)./va.*Bydata_interp./B0 - (uey_tot-0)./va.*Bxdata_interp./B0);
+%     
+%     JtotxBx = (upy_data_interp-uey_tot).*Bzdata_interp./B0./va - (upz_data_interp-uez_tot).*Bydata_interp./B0./va;
+%     JtotxBy = (upz_data_interp-uez_tot).*Bxdata_interp./B0./va - (upx_data_interp-uex_tot).*Bzdata_interp./B0./va;
+%     JtotxBz = (upx_data_interp-uex_tot).*Bydata_interp./B0./va - (upy_data_interp-uey_tot).*Bxdata_interp./B0./va;
+    
+    
+    
+    plot(smooth(UixBx(:,xcut)),'-b','linewidth',1); hold on
+    plot(smooth(UixBy(:,xcut)),'-g','linewidth',1);
+    plot(smooth(UixBz(:,xcut)),'-r','linewidth',1);
+    
+    set(gca,'ycolor','k')
+    Elabel = ylabel({'uixB/(vaB0)'},'FontSize',14)  ;
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5)
+    Elegend = legend('ix','iy','iz','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+    
+    axes(ha(axes_count));axes_count=axes_count+1;
+    
+    plot(smooth(UexBx(:,xcut)),'-b','linewidth',1); hold on
+    plot(smooth(UexBy(:,xcut)),'-g','linewidth',1);
+    plot(smooth(UexBz(:,xcut)),'-r','linewidth',1);
+    set(gca,'ycolor','k')
+    Elabel = ylabel({'uexB/(vaB0)'},'FontSize',14)  ;
+    hold off
+    xlim(zrange)
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5)
+    Elegend = legend('ex','ey','ez','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+    
+    
+    %      figure; plot(Ezdata_interp(:,xcut)./E0-(-uex_tot(:,xcut).*Bydata_interp(:,xcut)+uey_tot(:,xcut).*Bxdata_interp(:,xcut))./va./B0)
+    % %     hold off
+    % %     yyaxis right
+    %
+    %     UexBx =    (delta_uey_tot)./va.*delta_Bzdata_interp./B0 - (delta_uez_tot)./va.*delta_Bydata_interp./B0;
+    %     UexBy = -( (delta_uex_tot)./va.*delta_Bzdata_interp./B0 - (delta_uez_tot)./va.*delta_Bxdata_interp./B0 );
+    %     UexBz =    (delta_uex_tot)./va.*delta_Bydata_interp./B0 - (delta_uey_tot)./va.*delta_Bxdata_interp./B0;
+    %
+    %     plot(smooth(UexBx(:,xcut)),'--b','linewidth',1); %hold on
+    %     plot(smooth(UexBy(:,xcut)),'--g','linewidth',1);
+    %     plot(smooth(UexBz(:,xcut)),'--r','linewidth',1);
+    %
+% %     Elabel = ylabel({'\Deltau_exB/(vaB0)'},'FontSize',14)  ;  
+% 
+%     set(gca,'ycolor','k')
+%     yyaxis left
+%     set(gca,'ycolor','k')
+%     Elabel = ylabel({'uxB/(vaB0)'},'FontSize',14)  ;  
+%     hold off
+%     xlim(zrange)
+%     set(gca,'xminortick','on','yminortick','on','linewidth',1.5)
+%         Elegend = legend('ix','iy','iz','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+
+        
+        axes(ha(axes_count));axes_count=axes_count+1;
+        
+        EEx = JtotxBx+UixBx;
+        EEy = JtotxBy+UixBy;
+        EEz = JtotxBz+UixBz;
+        
+        plot(smooth(EEx(:,xcut)),'-b','linewidth',1); hold on
+        plot(smooth(EEy(:,xcut)),'-g','linewidth',1);
+        plot(smooth(EEz(:,xcut)),'-r','linewidth',1);
+        set(gca,'ycolor','k')
+        Elabel = ylabel({'JxB+uxB'},'FontSize',14)  ;
+        hold off
+        xlim(zrange)
+        set(gca,'xminortick','on','yminortick','on','linewidth',1.5)
+        Elegend = legend('x','y','z','Location','northeast','Orientation','horizontal','fontsize',12); legend('boxoff')
+    %% Draw
+    drawnow
+        fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/',RunNumber,'/','2d_Hybrid_Foreshock_Halltest_',RunNumber,'_',string(i));
+%          print(gcf,'-dpng','-r300','-loose',fileNamePNG); 
+%     g(i) = getframe(fig); %#ok<SAGROW>
+%     writeVideo(v,g(i));
+    
+    delete(h)
+    delete(ha)
+    delete(Alegend)
+    delete(Blegend)
+    delete(Clegend)
+    delete(Dlegend)
+%     delete(Elegend)
+    delete(Flegend)
+    delete(Glegend)
+    delete(Alabel)
+    delete(Blabel)
+    delete(Clabel)
+    delete(Dlabel)
+%     delete(Elabel)
+    delete(Flabel)
+    delete(Glabel)
+end
+function [x,y,z] =crossmat(Ax,Ay,Az,Bx,By,Bz)
+    x =    Ay.*Bz - Az.*By;
+    y = - (Ax.*Bz - Az.*Bx);
+    z =    Ax.*By - Ay.*Bx;
+end
