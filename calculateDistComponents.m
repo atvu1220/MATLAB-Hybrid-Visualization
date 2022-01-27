@@ -5,7 +5,7 @@ t=2*t; %2*25 stepoutput = a frame per 50 steps.
 [X,Z,X2,Z2] = scale_Data(qx,qz);
 nt=	floor(timeSteps/25);
 filterNumber = 1;
-if dir == "x"
+if dir == "X"
     component = [];
     for j=1:length(ParticleInCellPos(:,1))
         %partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));
@@ -13,7 +13,7 @@ if dir == "x"
             ParticleInCellVel(j,1),ParticleInCellVel(j,2),ParticleInCellVel(j,3));
         component = [component;vpara];
     end
-elseif dir == "y"
+elseif dir == "Y"
     component = [];
     for j=1:length(ParticleInCellPos(:,1))
         %partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));
@@ -25,7 +25,7 @@ elseif dir == "y"
 %         end
         component = [component;vpara];
     end
-elseif dir == "z"
+elseif dir == "Z"
     component = [];
     for j=1:length(ParticleInCellPos(:,1))
         %partPos = fliplr(floor(ParticleInCellPos(j,:)./(qx(2)-qx(1))));

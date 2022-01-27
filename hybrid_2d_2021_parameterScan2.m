@@ -28,25 +28,25 @@ va = 48.95;
 % (outputFolder,dt,outputSteps,time,xcut,nfs_setup,swSpeed_setup,fsSpeed_setup,fsThermal_setup,shear_setup)
 
 %Different foreshock ion density ratios
-% [fs75] =   getCompressionProperties('220',dt,outputSteps,time,xcut,0.075,10,20,8,90);
-% [fs105] =  getCompressionProperties('221',dt,outputSteps,time,xcut,0.105,10,20,8,90);
-% [fs135] =  getCompressionProperties('223',dt,outputSteps,time,xcut,0.135,10,20,8,90);
-% 
-% [fs135b] = getCompressionProperties('237',dt,outputSteps,time,xcut,0.135,10,20,8,90);
-% [fs75b] =  getCompressionProperties('238',dt,outputSteps,time,xcut,0.075,10,20,8,90);
-% 
-% [fs7] =    getCompressionProperties('245',dt,outputSteps,time,xcut,0.07,10,20,8,90);
-% [fs8] =    getCompressionProperties('246',dt,outputSteps,time,xcut,0.08,10,20,8,90);
-% [fs13] =   getCompressionProperties('247',dt,outputSteps,time,xcut,0.13,10,20,8,90);
-% [fs14] =   getCompressionProperties('248',dt,outputSteps,time,xcut,0.14,10,20,8,90);
-% 
-% [fs165] =  getCompressionProperties('224',dt,outputSteps,time,xcut,0.165,10,20,8,90);
-% [fs45] =   getCompressionProperties('236',dt,outputSteps,time,xcut,0.045,10,20,8,90);
-% [fs6] =    getCompressionProperties('208',dt,outputSteps,time,xcut,0.06,10,20,8,90);
-% [fs9] =    getCompressionProperties('209',dt,outputSteps,time,xcut,0.09,10,20,8,90);
-% [fs12] =   getCompressionProperties('222',dt,outputSteps,time,xcut,0.12,10,20,8,90);
-% [fs15] =   getCompressionProperties('210',dt,outputSteps,time,xcut,0.15,10,20,8,90);
-% [fs18] =   getCompressionProperties('211',dt,outputSteps,time,xcut,0.18,10,20,8,90);
+[fs75] =   getCompressionProperties('220',dt,outputSteps,time,xcut,0.075,10,20,8,90);
+[fs105] =  getCompressionProperties('221',dt,outputSteps,time,xcut,0.105,10,20,8,90);
+[fs135] =  getCompressionProperties('223',dt,outputSteps,time,xcut,0.135,10,20,8,90);
+
+[fs135b] = getCompressionProperties('237',dt,outputSteps,time,xcut,0.135,10,20,8,90);
+[fs75b] =  getCompressionProperties('238',dt,outputSteps,time,xcut,0.075,10,20,8,90);
+
+[fs7] =    getCompressionProperties('245',dt,outputSteps,time,xcut,0.07,10,20,8,90);
+[fs8] =    getCompressionProperties('246',dt,outputSteps,time,xcut,0.08,10,20,8,90);
+[fs13] =   getCompressionProperties('247',dt,outputSteps,time,xcut,0.13,10,20,8,90);
+[fs14] =   getCompressionProperties('248',dt,outputSteps,time,xcut,0.14,10,20,8,90);
+
+[fs165] =  getCompressionProperties('224',dt,outputSteps,time,xcut,0.165,10,20,8,90);
+[fs45] =   getCompressionProperties('236',dt,outputSteps,time,xcut,0.045,10,20,8,90);
+[fs6] =    getCompressionProperties('208',dt,outputSteps,time,xcut,0.06,10,20,8,90);
+[fs9] =    getCompressionProperties('209',dt,outputSteps,time,xcut,0.09,10,20,8,90);
+[fs12] =   getCompressionProperties('222',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+[fs15] =   getCompressionProperties('210',dt,outputSteps,time,xcut,0.15,10,20,8,90);
+[fs18] =   getCompressionProperties('211',dt,outputSteps,time,xcut,0.18,10,20,8,90);
 % 
 % %Different Shear
 % [d30] = getCompressionProperties('204',dt,outputSteps,time,xcut,012,10,20,8,30);
@@ -64,11 +64,11 @@ va = 48.95;
 % [M16] = getCompressionProperties('218',dt,outputSteps,time,xcut,012,16,32,8,90);
 
 % %Different FS Speeds
-[FSv12] = getCompressionProperties('225',dt,outputSteps,time,xcut,012,10,12,8,90);
-[FSv16] = getCompressionProperties('226',dt,outputSteps,time,xcut,012,10,16,8,90);
-[FSv20] = getCompressionProperties('222',dt,outputSteps,time,xcut,012,10,20,8,90);
-[FSv24] = getCompressionProperties('227',dt,outputSteps,time,xcut,012,10,24,8,90);
-[FSv28] = getCompressionProperties('218',dt,outputSteps,time,xcut,012,10,28,8,90);
+% [FSv12] = getCompressionProperties('225',dt,outputSteps,time,xcut,012,10,12,8,90);
+% [FSv16] = getCompressionProperties('226',dt,outputSteps,time,xcut,012,10,16,8,90);
+% [FSv20] = getCompressionProperties('222',dt,outputSteps,time,xcut,012,10,20,8,90);
+% [FSv24] = getCompressionProperties('227',dt,outputSteps,time,xcut,012,10,24,8,90);
+% [FSv28] = getCompressionProperties('218',dt,outputSteps,time,xcut,012,10,28,8,90);
 
 % % %Different Shear
 % [d15] = getCompressionProperties('229',dt,outputSteps,time,xcut,0.12,10,20,8,15);
@@ -837,6 +837,10 @@ xlabel('n_{fs} [n0]')
 ylabel('SW Uz [km/s]')
 legend('location','southeast')
 title('n_{fs} vs. SW Uz at t=10')
+
+ %   fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/',RunNumber,'/','2d_Hybrid_Foreshock_paperFig3_',RunNumber,'_',string(i));
+    
+%     print(gcf,'-dpng','-r300','-loose',fileNamePNG);
 %% n_fs vs SW UZ at 26
 cutTime = 26;
 figure; set(gcf,'color','w');

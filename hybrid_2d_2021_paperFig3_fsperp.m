@@ -3,14 +3,14 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 fig = figure('Position',[ 1 1 750 1500]);
 % fig = figure('Position',[ 1 1 500 1500]);
 
-outputFolder = '325';
+outputFolder = '222';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
-timeSteps = 1200;
+timeSteps =900;
 
 outputSteps = 25;
 nt=	floor(timeSteps/outputSteps);
@@ -26,10 +26,10 @@ pngSlice =0;% 6 / (outputSteps * dt);
 
 [ndata] = read_Plasma('n',nt,nx,ny,nz,outputDirectory);
 display('n loaded')
-[Tdata] = read_Plasma('Temp',nt,nx,ny,nz,outputDirectory);
-display('T loaded')
-[pdata] = read_Plasma('Momentum',nt,nx,ny,nz,outputDirectory);
-display('u loaded')
+% [Tdata] = read_Plasma('Temp',nt,nx,ny,nz,outputDirectory);
+% display('T loaded')
+[up_mixed_data] = read_Plasma('up_mixed',nt,nx,ny,nz,outputDirectory);
+disp('u foreshock loaded')
 [Bdata] = read_Plasma('B',nt,nx,ny,nz,outputDirectory);
 display('B loaded')
 %[Edata] = read_Plasma('E',nt,nx,ny,nz,outputDirectory);
@@ -55,7 +55,7 @@ zrange = [nz/2-1 - 99, nz/2-1 + 99];
  zrange = [nz/2-1 - 58 nz/2-1 + 59]
  
 % zrange = [151 399]
-%zrange = [2 nz-2]
+% zrange = [2 nz-2]
 % zrange = [ 201 399]
 % zrange = [101 499]
 % zrange = [1 500]
@@ -64,7 +64,7 @@ zrange = [nz/2-1 - 99, nz/2-1 + 99];
 % zrange = [ 152 448]
 moverq=1.0378e-8;
 if pngSlice ==0
-    fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/2d_Hybrid_Foreshock_PaperFig3b_',RunNumber,'_',string(xcut));%,'_100z');
+    fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/2d_Hybrid_Foreshock_PaperFig3_fs_',RunNumber,'_',string(xcut));%,'_100z');
     v = VideoWriter(fileName);
     v.FrameRate= 10;
     open(v);
@@ -84,9 +84,9 @@ filterNumber = 1;
 n0 = mean(ndata_interp(floor(nz-nz/4):nz-1,2:end-1),'all');
 n0 = imgaussfilt(n0,1);
 
-[Tdata_interp] = interpolate_Data(Tdata,1,1,nx,nz,X,Z,X2,Z2);
-t0 = mean(Tdata_interp(floor(nz-nz/4):nz-1,2:end-1),'all');
-t0 = imgaussfilt(t0,1);
+% [Tdata_interp] = interpolate_Data(Tdata,1,1,nx,nz,X,Z,X2,Z2);
+% t0 = mean(Tdata_interp(floor(nz-nz/4):nz-1,2:end-1),'all');
+% t0 = imgaussfilt(t0,1);
 
 J0 =(5e-9/(moverq))/ (qx(2)-qx(1));
 if pngSlice == 0
@@ -95,6 +95,8 @@ else
     startTime = pngSlice;
     nt = pngSlice;
 end
+
+nfs205 = [];
 for i=startTime:stepInterval:nt
     [ha,~] = tight_subplot(plot_height,plot_width,[0.01 0.01],0.1,0.15);
     h = sgtitle(sprintf('time = %2.2f gyroperiods at x=%3d',output*dt*double(i),xcut));
@@ -137,7 +139,7 @@ for i=startTime:stepInterval:nt
 %     n_cold_data_interp2 = (interpolate_Data(n_cold_data,1,i,nx,nz,X,Z,X2,Z2))./n0;
     [n_mixed_data_interp] = imgaussfilt((interpolate_Data(n_mixed_data,1,i,nx,nz,X,Z,X2,Z2))./n0,filterNumber);
     
-     
+    nfs205 = [nfs205,n_mixed_data_interp(205,xcut)];
     hold off
     yyaxis left
     plot(smooth((n_cold_data_interp(:,xcut))),'b','linewidth',1)
@@ -174,67 +176,21 @@ for i=startTime:stepInterval:nt
     xlim(zrange)
     set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
     nlegend = legend('sw','1+\Deltantot/n0','fs','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
-    
-    
-    
-    
-%     hold off
-%     yyaxis left
-%     plot(smooth((n_cold_data_interp(:,xcut))),'b','linewidth',1)
-%     hold on
-%     yyaxis right
-%     plot(smooth((n_mixed_data_interp(:,xcut))),'r','linewidth',1)
-%     ylim([0 0.2])
-%     set(gca,'ycolor','r','yminortick','on')
-%     yyaxis left
-%     plot(smooth((ndata_interp(:,xcut))),'k','linewidth',1)
-%     ylim([-.5 0.5])
-%     set(gca,'ycolor','b')
-%     hold off
-%     ylabel({'\Deltan/n0';'[cm^{-3}]'},'FontSize',14)
-%     xlim(zrange)
-%     set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
-%     nlegend = legend('sw','total','fs','Location','southeast','Orientation','horizontal'); legend('boxoff')
-    
-    
-         
-%     hold off
-%     yyaxis left
-%     plot(smooth((n_cold_data_interp(:,xcut))),'b','linewidth',1)
-%     ylim([0 1.5])
-%     set(gca,'ycolor','b')
-%     yyaxis right
-%     plot(smooth((n_mixed_data_interp(:,xcut))),'r','linewidth',1)
-%     hold on
-%     set(gca,'ycolor','r','yminortick','on')
-% %     yyaxis left
-% %     plot(smooth((ndata_interp(:,xcut))),'k','linewidth',1)
-%     plot(smooth((n_mixed_data_interp(:,xcut)))./smooth((n_cold_data_interp(:,xcut))) ,'k','linewidth',1) 
-%     
-%     ylim([0 0.2])
-%     
-%     yyaxis left
-%     hold off
-%     ylabel({'n/n0';'[cm^{-3}]'},'FontSize',14)
-%     xlim(zrange)
-%     set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
-%     nlegend = legend('sw','fs','fs/sw ratio','Location','southeast','Orientation','horizontal'); legend('boxoff')
-    
-    
+
     
 %     plot3 = subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
     axes(ha(3));
     hold on
-    [pxdata_interp] = imgaussfilt((interpolate_Data(pdata,1,i,nx,nz,X,Z,X2,Z2)-0*interpolate_Data(pdata,1,1,nx,nz,X,Z,X2,Z2))./va,filterNumber);
-    [pydata_interp] = imgaussfilt((interpolate_Data(pdata,2,i,nx,nz,X,Z,X2,Z2)-0*interpolate_Data(pdata,2,1,nx,nz,X,Z,X2,Z2))./va,filterNumber);
-    [pzdata_interp] = imgaussfilt((interpolate_Data(pdata,3,i,nx,nz,X,Z,X2,Z2)-0*interpolate_Data(pdata,3,1,nx,nz,X,Z,X2,Z2))./va,filterNumber);
+    [pxdata_interp] = imgaussfilt((interpolate_Data(up_mixed_data,1,i,nx,nz,X,Z,X2,Z2)-0*interpolate_Data(up_mixed_data,1,1,nx,nz,X,Z,X2,Z2))./va,filterNumber);
+    [pydata_interp] = imgaussfilt((interpolate_Data(up_mixed_data,2,i,nx,nz,X,Z,X2,Z2)-0*interpolate_Data(up_mixed_data,2,1,nx,nz,X,Z,X2,Z2))./va,filterNumber);
+    [pzdata_interp] = imgaussfilt((interpolate_Data(up_mixed_data,3,i,nx,nz,X,Z,X2,Z2)-0*interpolate_Data(up_mixed_data,3,1,nx,nz,X,Z,X2,Z2))./va,filterNumber);
     hold off
     plot(smooth(pxdata_interp(:,xcut)),'b','linewidth',1)
     hold on
     plot(smooth(pydata_interp(:,xcut)),'g','linewidth',1)
     plot(smooth(pzdata_interp(:,xcut)),'r','linewidth',1)
     hold off
-    ylabel({'v/va'},'FontSize',14)
+    ylabel({'vfs/va'},'FontSize',14)
     
     xlim(zrange)
 %     if max(abs(ylim)) > 15
@@ -243,26 +199,36 @@ for i=startTime:stepInterval:nt
 %         ylim([-3 15])
 %     end
 
-ylim([-10 15])
+ylim([-32 7])
 % ylim([-3 11])
-    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
-    vlegend = legend('vx','vy','vz','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
-    
-    
+set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
+vlegend = legend('vx','vy','vz','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
+
+
 %     plot4 = subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
     axes(ha(4));
-    [Tdata_interp] = imgaussfilt((interpolate_Data(Tdata,1,i,nx,nz,X,Z,X2,Z2))./t0,filterNumber);
-    plot(smooth(Tdata_interp(:,xcut)),'linewidth',1.5)
-    ylabel({'T/T0'},'FontSize',14)
-    if max(abs(ylim)) > 150
-        ylim([0 max(abs(ylim))])
-    else
-        ylim([0 150])
-    end
-%     ylim([0 100])
-    xlim(zrange)
-    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
+    [~,~,~,pdata_perpx,pdata_perpy,pdata_perpz] = ...
+        calculate_componentsVector(Bxdata_interp,Bydata_interp,Bzdata_interp,pxdata_interp,pydata_interp,pzdata_interp);
     
+    hold on
+    hold off
+    plot(smooth(pdata_perpx(:,xcut)),'b','linewidth',1)
+    hold on
+    plot(smooth(pdata_perpy(:,xcut)),'g','linewidth',1)
+    plot(smooth(pdata_perpz(:,xcut)),'r','linewidth',1)
+    vperp = (pdata_perpx(:,xcut).^2 + pdata_perpy(:,xcut).^2 + pdata_perpz(:,xcut).^2).^(1/2);
+    plot(smooth( vperp  ),'k','linewidth',1)
+
+    hold off
+    ylabel({'vfsperp/va'},'FontSize',14)
+    
+    xlim(zrange)
+    ylim([-32 32])
+    % ylim([-3 11])
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
+    vlegend = legend('vperpx','vperpy','vperpz','vperptot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
+
+
 %     plot5 = subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
     axes(ha(5));
     hold on
