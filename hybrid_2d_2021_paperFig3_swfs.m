@@ -3,14 +3,14 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 % fig = figure('Position',[ 1 1 750 1500]);
 fig = figure('Position',[ 1 1 500 1500]);
 
-outputFolder = '322';
+outputFolder = '382';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
-timeSteps = 900;
+timeSteps = 1000;
 
 outputSteps = 25;
 nt=	floor(timeSteps/outputSteps);
@@ -55,7 +55,7 @@ display('T loaded')
 [pdata] = read_Plasma('Momentum',nt,nx,ny,nz,outputDirectory);
 display('v loaded')
 
-xcut = 195;%400
+xcut = 150;%400
 zmid = nz/2;
 ddthickness = 24;
 foreshockthickness = 300;
@@ -68,7 +68,9 @@ zrange = [nz/2-1 - 99, nz/2-1 + 99];
 
  zrange = [nz/2-1 - 58 nz/2-1 + 59]
  zrange = [151 249];%[(nx-2)/2-49 (nx-2)/2+49]
+zrange = [151 249]
 
+zrange = [2 nz-1]
 %  zrange = [301 499]
 %  zrange = [2 nz-3]
 %  zrange = [152 448]
@@ -163,7 +165,7 @@ for i=startTime:stepInterval:nt
     else
         ylim([0 1.5])
     end
-    ylim([0 4.0])
+%     ylim([0 4.0])
     yyaxis right
     hold on
     plot(smooth((n_mixed_data_interp(:,xcut))),'r','linewidth',1.5)
@@ -215,7 +217,7 @@ for i=startTime:stepInterval:nt
     %ylim([-10 15])
     ylim([-3 11])
     set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
-    vlegend = legend('vx','vy','vz','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
+    vlegend = legend('vx','vy','vz','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
     
     
     
@@ -328,16 +330,17 @@ for i=startTime:stepInterval:nt
     hold off
     ylabel({'J/J0'},'FontSize',14)
     xlim(zrange)
-    if max(abs(ylim)) > .025
+    if max(abs(ylim)) > .005
         ylim([-max(abs(ylim)) max(abs(ylim))])
     else
-        ylim([-.025 .025])
+        ylim([-.005 .005])
     end
     
-     ylim([-0.31 +0.31])
+    
+    %ylim([-0.31 +0.31])
     set(gca,'xminortick','on','yminortick','on','linewidth',1.5)
     xlabel({'Z','[\lambda_i]'},'FontSize',14)
-    Jlegend = legend('Jx','Jy','Jz','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
+    Jlegend = legend('Jx','Jy','Jz','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
     
     
     %Calculate Gyroradii
@@ -394,7 +397,7 @@ for i=startTime:stepInterval:nt
     %% Draw
     drawnow
     
-    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/',RunNumber,'/','2d_Hybrid_Foreshock_paperFig3_swfs2_',RunNumber,'_',string(i));
+    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/',RunNumber,'/','2d_Hybrid_Foreshock_paperFig3_FSgyro_',RunNumber,'_',string(i));
       
     drawnow
     

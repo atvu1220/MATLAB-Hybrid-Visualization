@@ -1,7 +1,9 @@
 %Get the properties of the FB compresional boundary for muiltiple runs with
 %different parameters
 % clear 
-load('/import/c1/DAYSIDE/atvu/RunsOutput120_12242021.mat')
+% load('/import/c1/DAYSIDE/atvu/RunsOutput120_12242021.mat')
+
+load('/import/c1/DAYSIDE/atvu/RunsOutput120_2022-02-23.mat')
 
 timeSteps = 500;
 outputSteps = 25;
@@ -14,7 +16,7 @@ stepInterval = 1;
 time = 800/50;%18;%gyroperiods
 timeFrame = time/(dt*outputSteps)
 
-xcut=120;
+xcut=160;
 
 n0 = 5e15;
 va = 48.95;
@@ -97,6 +99,9 @@ va = 48.95;
 [FSv24] = getCompressionProperties('227',dt,outputSteps,time,xcut,012,10,24,8,90);
 [FSv28] = getCompressionProperties('228',dt,outputSteps,time,xcut,012,10,28,8,90);
 
+
+
+
 % % %Different Shear
 [d15] = getCompressionProperties('229',dt,outputSteps,time,xcut,0.12,10,20,8,15);
 [d30] = getCompressionProperties('204',dt,outputSteps,time,xcut,0.12,10,20,8,30);
@@ -124,6 +129,16 @@ va = 48.95;
 [fsT8] = getCompressionProperties('222',dt,outputSteps,time,xcut,0.12,10,20,8,90);
 [fsT9] = getCompressionProperties('244',dt,outputSteps,time,xcut,0.12,10,20,9,90);
 [fsT10] = getCompressionProperties('241',dt,outputSteps,time,xcut,0.12,10,20,10,90);
+
+
+%Different TD thicknesses
+[dd4] = getCompressionProperties('341',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+[dd8] = getCompressionProperties('342',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+[dd12] = getCompressionProperties('343',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+[dd16] = getCompressionProperties('344',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+[dd20] = getCompressionProperties('345',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+[dd24] = getCompressionProperties('346',dt,outputSteps,time,xcut,0.12,10,20,8,90);
+
 
 %%FS Distributions
 time = 550/50;
@@ -161,11 +176,17 @@ time = 800/50;
 [By225f] = getCompressionProperties('321',dt,outputSteps,time,12*10,0.12,10,20,8,90);
 [By30f] = getCompressionProperties('322',dt,outputSteps,time,12*10,0.12,10,20,8,90);
 
+%Same time and same place
+[By75f] = getCompressionProperties('330',dt,outputSteps,time,12*10,0.12,10,20,8,90);
+[By15f] = getCompressionProperties('320',dt,outputSteps,time,12*10,0.12,10,20,8,90);
+[By225f] = getCompressionProperties('321',dt,outputSteps,time,12*10,0.12,10,20,8,90);
+[By30f] = getCompressionProperties('322',dt,outputSteps,time,12*10,0.12,10,20,8,90);
 
-% [By75f] = getCompressionProperties('330',dt,outputSteps,time,12*ceil(10*cosd(7.5)),0.12,10,20,8,90);
-% [By15f] = getCompressionProperties('320',dt,outputSteps,time,12*ceil(10*cosd(15)),0.12,10,20,8,90);
-% [By225f] = getCompressionProperties('321',dt,outputSteps,time,12*ceil(10*cosd(22.5)),0.12,10,20,8,90);
-% [By30f] = getCompressionProperties('322',dt,outputSteps,time,12*ceil(10*cosd(30)),0.12,10,20,8,90);
+%Same Time, different position basd on SW para speed
+[By75f] = getCompressionProperties('330',dt,outputSteps,time,12*ceil(10*cosd(7.5)),0.12,10,20,8,90);
+[By15f] = getCompressionProperties('320',dt,outputSteps,time,12*ceil(10*cosd(15)),0.12,10,20,8,90);
+[By225f] = getCompressionProperties('321',dt,outputSteps,time,12*ceil(10*cosd(22.5)),0.12,10,20,8,90);
+[By30f] = getCompressionProperties('322',dt,outputSteps,time,12*ceil(10*cosd(25)),0.12,10,20,8,90);
 
 time = 875/50;
 xcut = 150;
@@ -185,7 +206,490 @@ xcut = 150;
 earlyTime = 12;
 lateTime = 18;
 centerTime = 12;
-windowTime = 1;
+windowTime = 2;
+%% Testing Jperp Pos and N pos
+%peak J/peak N
+for cutTime = [centerTime]
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+nfs = 10*[0.9,1.2,1.6,2.0,2.4,2.8];
+n = mean([FSv12.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv20.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv24.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv28.maxJperp(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([FSv09.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv12.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv16.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv20.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv24.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv28.maxN(cutTime-windowTime:cutTime+windowTime,xcut)],1)/n0;
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([11.5 28.5])
+% P_Shear = polyfit(nfs,u,1);
+% corr = corrcoef(nfs,u);
+% Xint = P_Shear(2) / -(P_Shear(1));
+% xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+% yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*92/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('max Jperp [J0]','fontsize',14)
+% ylim([1.0 2.625])
+yyaxis left
+
+box on; grid on
+xlabel('FS U_{||} [V_A]','fontsize',14)
+ylabel('max N [n0]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial FS Ion Parallel Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Parallel Speed'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','FSUpara_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+
+% P = polyfit(nfs,u,1);
+% vpara_slope = [vpara_slope,P(1)];
+end
+
+%peak J/peak N pos
+for cutTime = [centerTime]
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+nfs = 10*[0.9,1.2,1.6,2.0,2.4,2.8];
+n = mean([FSv12.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv20.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv24.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv28.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([FSv09.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv12.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv16.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv20.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv24.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    FSv28.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut)],1);
+
+% yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([11.5 28.5])
+% P_Shear = polyfit(nfs,u,1);
+% corr = corrcoef(nfs,u);
+% Xint = P_Shear(2) / -(P_Shear(1));
+% xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+% yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*92/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+hold on
+
+% yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('Position [z]','fontsize',14)
+% ylim([1.0 2.625])
+% yyaxis left
+
+box on; grid on
+xlabel('FS U_{||} [V_A]','fontsize',14)
+% ylabel('max N [n0]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+% title(strcat('Initial FS Ion Parallel Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Parallel Speed'),'fontsize',14)
+legend({'max N Pos';'max Jperp Pos'},'location','west')
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','FSUpara_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+
+% P = polyfit(nfs,u,1);
+% vpara_slope = [vpara_slope,P(1)];
+end
+
+%peakJ/peakN
+for cutTime = [centerTime]
+% cutTime = 14;
+figure; set(gcf,'color','w');
+
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+nfs = ([15,30,45,60,75,90,105,120,135,150,165,180]);
+n = mean([d15.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d30.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d45.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d60.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d75.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d90.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d105.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d120.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d135.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d150.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d165.maxJperp(cutTime-windowTime:cutTime+windowTime,:),...
+    d180.maxJperp(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([d15.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d30.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d45.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d60.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d75.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d90.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d105.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d120.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d135.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d150.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d165.maxN(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d180.maxN(cutTime-windowTime:cutTime+windowTime,xcut)],1)/n0;
+
+
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+xlim([0 185])
+xticks([0:15:180])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*96/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('max Jperp [J0]','fontsize',14)
+yyaxis left
+
+box on; grid on
+xlabel('\phi [°]','fontsize',14)
+ylabel('max N [n0]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Magnetic Shear Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+% title(strcat('Initial TD Magnetic Shear'),'fontsize',14)
+% xlim([0 1])
+
+% fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','MagneticShear_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
+
+
+for cutTime = [centerTime]
+% cutTime = 14;
+figure; set(gcf,'color','w');
+
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+nfs = ([15,45,75,90,105,135,165,180]);
+n = mean([d15.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d45.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d75.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d90.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d105.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d135.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d165.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:),...
+    d180.maxJperpPos(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([d15.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d45.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d75.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d90.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d105.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d135.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d165.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut),...
+    d180.maxNPos(cutTime-windowTime:cutTime+windowTime,xcut)],1);
+
+
+
+% yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+xlim([0 185])
+xticks([0:15:180])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*96/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+% yyaxis right
+scatter(nfs,n,300,'filled');
+% ylabel('max Jperp [J0]','fontsize',14)
+% yyaxis left
+
+box on; grid on
+xlabel('\phi [°]','fontsize',14)
+ylabel('Position [z]','fontsize',14)
+% legend('location','southeast')
+legend({'max N Pos';'max Jperp Pos'},'location','northeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Magnetic Shear Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+% title(strcat('Initial TD Magnetic Shear'),'fontsize',14)
+% xlim([0 1])
+
+% fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','MagneticShear_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
+
+
+
+%% Testing Current Pos
+%peak J
+for cutTime = [centerTime]
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+FSv12.maxdeltaJx
+nfs = 10*[0.9,1.2,1.6,2.0,2.4,2.8];
+n = mean([FSv12.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+   FSv12.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv20.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv24.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv28.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([FSv09.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv16.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv20.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv24.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv28.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([11.5 28.5])
+% P_Shear = polyfit(nfs,u,1);
+% corr = corrcoef(nfs,u);
+% Xint = P_Shear(2) / -(P_Shear(1));
+% xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+% yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*92/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('n at peak Jy Pos [z]','fontsize',14)
+% ylim([1.0 2.625])
+yyaxis left
+
+box on; grid on
+xlabel('FS U_{||} [V_A]','fontsize',14)
+ylabel('n at peak Jx Pos [z]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial FS Ion Parallel Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Parallel Speed'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','FSUpara_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+
+% P = polyfit(nfs,u,1);
+% vpara_slope = [vpara_slope,P(1)];
+end
+
+for cutTime = [centerTime]
+% cutTime = 14;
+figure; set(gcf,'color','w');
+
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+nfs = ([15,45,75,90,105,135,165,180]);
+n = mean([d15.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d45.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d75.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d90.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d105.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d135.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d165.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d180.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([d15.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d45.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d75.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d90.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d105.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d135.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d165.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d180.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+xlim([0 185])
+xticks([0:15:180])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*96/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('n at peak Jy pos [z]','fontsize',14)
+yyaxis left
+
+box on; grid on
+xlabel('\phi [°]','fontsize',14)
+ylabel('n at peak Jx pos [z]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Magnetic Shear Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+% title(strcat('Initial TD Magnetic Shear'),'fontsize',14)
+% xlim([0 1])
+
+% fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','MagneticShear_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
+
+close  
+%n at peak J pos
+windowTime=1
+for cutTime = [centerTime]
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+FSv12.maxdeltaJx
+nfs = 10*[0.9,1.2,1.6,2.0,2.4,2.8];
+n = mean([FSv12.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+   FSv12.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv20.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv24.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv28.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([FSv09.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv12.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv16.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv20.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv24.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    FSv28.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([11.5 28.5])
+% P_Shear = polyfit(nfs,u,1);
+% corr = corrcoef(nfs,u);
+% Xint = P_Shear(2) / -(P_Shear(1));
+% xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+% yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*92/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('n at peak Jy Pos [z]','fontsize',14)
+% ylim([1.0 2.625])
+yyaxis left
+
+box on; grid on
+xlabel('FS U_{||} [V_A]','fontsize',14)
+ylabel('n at peak Jx Pos [z]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial FS Ion Parallel Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Parallel Speed'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','FSUpara_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+
+% P = polyfit(nfs,u,1);
+% vpara_slope = [vpara_slope,P(1)];
+end
+
+for cutTime = [centerTime]
+% cutTime = 14;
+figure; set(gcf,'color','w');
+
+% cutTime = cutTime-windowTime:cutTime+windowTime;
+nfs = ([15,45,75,90,105,135,165,180]);
+n = mean([d15.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d45.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d75.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d90.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d105.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d135.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d165.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:),...
+    d180.nfsatmaxJx(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+u = mean([d15.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d45.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d75.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d90.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d105.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d135.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d165.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:),...
+    d180.nfsatmaxJy(cutTime-windowTime:cutTime+windowTime,:)],1);
+
+
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+xlim([0 185])
+xticks([0:15:180])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*96/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('n at peak Jy pos [z]','fontsize',14)
+yyaxis left
+
+box on; grid on
+xlabel('\phi [°]','fontsize',14)
+ylabel('n at peak Jx pos [z]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Magnetic Shear Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+% title(strcat('Initial TD Magnetic Shear'),'fontsize',14)
+% xlim([0 1])
+
+% fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','MagneticShear_',string(cutTime));
+    
+% print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
 %% n_fs
 [Times,Slope_nfs] = calculateSlopeperTime(...
      [2.5,4.5,6,8,10.5,12,14,16.5,18]./100,...
@@ -250,6 +754,8 @@ ylabel('Expansion Speed [V_A]','fontsize',14)
 cutTime = mean(cutTime);
 % legend('location','southeast')
 title(strcat('Initial FS Ion Density Ratio Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Density Ratio'),'fontsize',14)
+
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','n_fs_',string(cutTime));
     
@@ -313,11 +819,12 @@ ylabel('Density Compression Ratio [n_0]','fontsize',14)
 yyaxis left
 
 box on; grid on
-xlabel('SW U [V_A]','fontsize',14)
+xlabel('SW U, ½ FS U [V_A]','fontsize',14)
 ylabel('Expansion Speed [V_A]','fontsize',14)
 % legend('location','southeast')
 cutTime = mean(cutTime);
 title(strcat('Initial Ion Bulk Flow Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial Ion Bulk Flow Speed'),'fontsize',14)
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','M_A_',string(cutTime));
     
@@ -421,6 +928,7 @@ ylabel('Expansion Speed [V_A]','fontsize',14)
 cutTime = mean(cutTime);
 % legend('location','southeast')
 title(strcat('Initial SW Ion Parallel Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial SW Ion Parallel Speed'),'fontsize',14)
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','SWUpara',string(cutTime));
     
@@ -521,11 +1029,12 @@ text(xL(1)+3*xL(2)/100, yL(2)*94.5/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',
 
 
 box on; grid on
-xlabel('SW U_{||} [V_A]','fontsize',14)
+xlabel('SW U_{||} (SW Frame) [V_A]','fontsize',14)
 ylabel('Expansion Speed [V_A]','fontsize',14)
 cutTime = mean(cutTime);
 % legend('location','southeast')
 title(strcat('Initial SW Ion Parallel Speed in SW Frame Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',12)
+title(strcat('Initial SW Ion Parallel Speed (in SW Frame)'),'fontsize',14)
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','SWUpara_SWframe_',string(cutTime));
     
@@ -582,7 +1091,7 @@ text(xL(1)+3*xL(2)/100, yL(2)*92/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0
 yyaxis right
 scatter(nfs,n,300,'filled');
 ylabel('Density Compression Ratio [n_0]','fontsize',14)
-% ylim([1.0 2.625])
+ylim([1.0 2.625])
 yyaxis left
 
 box on; grid on
@@ -591,6 +1100,7 @@ ylabel('Expansion Speed [V_A]','fontsize',14)
 % legend('location','southeast')
 cutTime = mean(cutTime);
 title(strcat('Initial FS Ion Parallel Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Parallel Speed'),'fontsize',14)
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','FSUpara_',string(cutTime));
     
@@ -667,6 +1177,7 @@ ylabel('Expansion Speed [V_A]','fontsize',14)
 % legend('location','southeast')
 cutTime= mean(cutTime);
 title(strcat('Initial FS Ion Thermal Speed Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial FS Ion Thermal Speed'),'fontsize',14)
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','FSUperp_',string(cutTime));
      
@@ -703,7 +1214,7 @@ print(gcf,'-dpng','-r300','-loose',fileNamePNG);
     d150.maxU(:,:),...
     d165.maxU(:,:),...
     d180.maxU(:,:)]./va,'\phi',[0.12],windowTime);
-
+for centerTime = 5:2:12
 for cutTime = [centerTime]
 % cutTime = 14;
 figure; set(gcf,'color','w');
@@ -763,13 +1274,14 @@ ylabel('Expansion Speed [V_A]','fontsize',14)
 % legend('location','southeast')
 cutTime = mean(cutTime);
 title(strcat('Initial TD Magnetic Shear Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+% title(strcat('Initial TD Magnetic Shear'),'fontsize',14)
 % xlim([0 1])
 
-fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','MagneticShear_',string(cutTime));
+% fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','MagneticShear_',string(cutTime));
     
 print(gcf,'-dpng','-r300','-loose',fileNamePNG);
 end
-
+end
 %% sin ( Shear )
 C = 125/180;
 [Times,Slope_sinShear] = calculateSlopeperTime(...
@@ -858,6 +1370,7 @@ ylabel('Expansion Speed [V_A]','fontsize',14)
 % legend('location','southeast')
 cutTime = mean(cutTime);
 title(strcat('Initial TD Magnetic Shear Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial TD Magnetic Shear as sin(125/180\phi)'),'fontsize',14)
 % xlim([0 1])
 
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','sinMagneticShear_',string(cutTime));
@@ -865,6 +1378,229 @@ fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','sinMagneticShear_',
 print(gcf,'-dpng','-r300','-loose',fileNamePNG);
 end
 
+%% TD thickness
+[Times,Slope_MA] = calculateSlopeperTime(....
+    [0.5,1,1.5,2,2.5,3],...
+    [dd4.maxU(:,:),...
+    dd8.maxU(:,:),...
+    dd12.maxU(:,:),...
+    dd16.maxU(:,:),...
+    dd20.maxU(:,:),...
+    dd24.maxU(:,:)]./va,'U',[0.12],0);
+
+for cutTime = [28]
+ cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+
+nfs = [0.5,1.0,1.5,2.0,2.5,3];
+n = mean([dd4.peakN(cutTime,:),...
+    dd8.peakN(cutTime,:),...
+    dd12.peakN(cutTime,:),...
+    dd16.peakN(cutTime,:),...
+    dd20.peakN(cutTime,:),...
+    dd24.peakN(cutTime,:)]./n0,1);
+
+u = mean([dd4.maxU(cutTime,:),...
+    dd8.maxU(cutTime,:),...
+    dd12.maxU(cutTime,:),...
+    dd16.maxU(cutTime,:),...
+    dd20.maxU(cutTime,:),...
+    dd24.maxU(cutTime,:)]./va,1);
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([5.5 16.5])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*93/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+yyaxis right
+scatter(nfs,n,300,'filled');
+ylabel('Density Compression Ratio [n_0]','fontsize',14)
+yyaxis left
+
+box on; grid on
+xlabel('TD Thickness [FS R_g]','fontsize',14)
+ylabel('Expansion Speed [V_A]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Thickness Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial TD Thickness'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','TD_Thickness_',string(cutTime));
+    
+print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
+
+%% TD thickness, Leading Boundary
+
+for cutTime = [28]
+cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+
+nfs = [0.5,1.0,1.5,2.0,2.5,3];
+
+u = mean([dd4.peakN2(cutTime,:),...
+    dd8.peakN2(cutTime,:),...
+    dd12.peakN2(cutTime,:),...
+    dd16.peakN2(cutTime,:),...
+    dd20.peakN2(cutTime,:),...
+    dd24.peakN2(cutTime,:)]./n0,1);
+
+% yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([5.5 16.5])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*93/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+% yyaxis right
+% scatter(nfs,n,300,'filled');
+ylabel('Density Compression Ratio [n_0]','fontsize',14)
+% yyaxis left
+
+box on; grid on
+xlabel('TD Thickness [FS R_g]','fontsize',14)
+% ylabel('Expansion Speed [V_A]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Thickness Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial TD Thickness: Leading Boundary Compression'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','TD_Thickness_LeadingBoundary_',string(cutTime));
+    
+print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
+
+
+%% TD thickness, Currents Jx
+
+for cutTime = [24]
+cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+
+nfs = [0.5,1.0,1.5,2.0,2.5,3];
+
+u = mean([dd4.Jxmin1(cutTime,:),...
+    dd8.Jxmin1(cutTime,:),...
+    dd12.Jxmin1(cutTime,:),...
+    dd16.Jxmin1(cutTime,:),...
+    dd20.Jxmin1(cutTime,:),...
+    dd24.Jxmin1(cutTime,:)],1);
+
+u2 = mean([dd4.Jxmin2(cutTime,:),...
+    dd8.Jxmin2(cutTime,:),...
+    dd12.Jxmin2(cutTime,:),...
+    dd16.Jxmin2(cutTime,:),...
+    dd20.Jxmin2(cutTime,:),...
+    dd24.Jxmin2(cutTime,:)],1);
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([5.5 16.5])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*93/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+yyaxis right
+scatter(nfs,u2,300,'filled');
+ylabel('Trailing \Delta Jx [J_0]','fontsize',14)
+yyaxis left
+
+box on; grid on
+xlabel('TD Thickness [FS R_g]','fontsize',14)
+ylabel('Leading \Delta Jx [J_0]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Thickness Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial TD Thickness: \Delta Jx'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','TD_Thickness_DeltaJx_',string(cutTime));
+    
+print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
+%% TD thickness, Currents Jy
+
+for cutTime = [24]
+cutTime = cutTime-windowTime:cutTime+windowTime;
+figure; set(gcf,'color','w');
+
+
+nfs = [0.5,1.0,1.5,2.0,2.5,3];
+
+u = mean([dd4.Jymin1(cutTime,:),...
+    dd8.Jymin1(cutTime,:),...
+    dd12.Jymin1(cutTime,:),...
+    dd16.Jymin1(cutTime,:),...
+    dd20.Jymin1(cutTime,:),...
+    dd24.Jymin1(cutTime,:)],1);
+
+u2 = mean([dd4.Jymin2(cutTime,:),...
+    dd8.Jymin2(cutTime,:),...
+    dd12.Jymin2(cutTime,:),...
+    dd16.Jymin2(cutTime,:),...
+    dd20.Jymin2(cutTime,:),...
+    dd24.Jymin2(cutTime,:)],1);
+
+yyaxis left
+scatter(nfs,u,300,'filled'); hold on
+% xlim([5.5 16.5])
+P_Shear = polyfit(nfs,u,1);
+corr = corrcoef(nfs,u);
+Xint = P_Shear(2) / -(P_Shear(1));
+xLimits = xlim; x1 = linspace(Xint,xLimits(2)); y1 = polyval(P_Shear,x1);
+% xlim([Xint,xLimits(2)])
+% plot(x1,y1)
+yL = get(gca,'YLim'); xL = get(gca,'XLim'); 
+% text(xL(1)+2*xL(2)/100, yL(2)*99/100,sprintf('m=%1.3f',P_Shear(1)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+% text(xL(1)+3*xL(2)/100, yL(2)*93/100,sprintf('\\rho=%1.4f',corr(1,2)),'color',[0 0.4470 .7410],'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+
+
+
+yyaxis right
+scatter(nfs,u2,300,'filled');
+ylabel('Trailing \Delta Jy [J_0]','fontsize',14)
+yyaxis left
+
+box on; grid on
+xlabel('TD Thickness [FS R_g]','fontsize',14)
+ylabel('Leading \Delta Jy [J_0]','fontsize',14)
+% legend('location','southeast')
+cutTime = mean(cutTime);
+title(strcat('Initial TD Thickness Dependence at t =',{' '},string(cutTime/2),{' '},'\Omega_i'),'fontsize',14)
+title(strcat('Initial TD Thickness: \Delta Jy'),'fontsize',14)
+
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','TD_Thickness_DeltaJy_',string(cutTime));
+    
+print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+end
 
 %% Compression Ratio vs Exp Speed for FS Distributions
 
@@ -966,23 +1702,23 @@ shearCoeff = 125/180;
 Times = [8:16];
 for cutTime =Times
 x_nfs = [...
-    calculateModelSpeed(0.025, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-    calculateModelSpeed(0.045, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-    calculateModelSpeed(0.060, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-    calculateModelSpeed(0.080, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.105, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.140, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.165, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.180, 20, 10, sind(shearCoeff*090), 08,cutTime./2)];
+    calculateModelSpeed(0.025, 20, 10, 90, 08,cutTime./2);...
+    calculateModelSpeed(0.045, 20, 10, 90, 08,cutTime./2);...
+    calculateModelSpeed(0.060, 20, 10, 90, 08,cutTime./2);...
+    calculateModelSpeed(0.080, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.105, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.140, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.165, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.180, 20, 10, 90, 08,cutTime./2)];
  
  
 x_Ma= [...
-     calculateModelSpeed(0.120, 20, 06, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 08, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 12, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 14, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 16, sind(shearCoeff*090), 08,cutTime./2)...
+     calculateModelSpeed(0.120, 20, 06, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 08, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 12, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 14, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 16, 90, 08,cutTime./2)...
 %      calculateModelSpeed(0.120, 12, 06, sind(2/3*090), 08,cutTime./2);...
 %      calculateModelSpeed(0.120, 16, 08, sind(2/3*090), 08,cutTime./2);...
 %      calculateModelSpeed(0.120, 20, 10, sind(2/3*090), 08,cutTime./2);...
@@ -992,36 +1728,36 @@ x_Ma= [...
 ];
 %  
 x_vfspara = [...
-     calculateModelSpeed(0.120, 09, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 12, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 16, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 24, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 28, 10, sind(shearCoeff*090), 08,cutTime./2)];
+     calculateModelSpeed(0.120, 09, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 12, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 16, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 24, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 28, 10, 90, 08,cutTime./2)];
  
 x_vfsthermal= [... 
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 02,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 04,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 05,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 06,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 07,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 09,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 10,cutTime./2)];
+     calculateModelSpeed(0.120, 20, 10, 90, 02,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 04,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 05,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 06,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 07,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 09,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 10,cutTime./2)];
      
 x_shear= [... 
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*015), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*030), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*045), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*060), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*075), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*090), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*105), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*120), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*135), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*150), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*165), 08,cutTime./2);...
-     calculateModelSpeed(0.120, 20, 10, sind(shearCoeff*180), 08,cutTime./2)];
+     calculateModelSpeed(0.120, 20, 10, 15, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 30, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 45, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 60, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 75, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 105, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 120, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 135, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 150, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 165, 08,cutTime./2);...
+     calculateModelSpeed(0.120, 20, 10, 180, 08,cutTime./2)];
 
 y_nfs = [...
      fs25.maxU(cutTime,:);...
@@ -1155,7 +1891,7 @@ scatter(Times./2,slopeofExpOverModel_vfsthermal,100,'filled')
 scatter(Times./2,slopeofExpOverModel_shear,100,'filled')
 xlabel('Time [\Omega_i]','fontsize',14)
 ylabel('Slope of Exp./Model Speeds [#]','fontsize',14)
-legend({'n_{fs}';'v_{sw,||}';'v_{fs,||}';'v_{fs,\perp}';'sin(125/180\phi)'},'fontsize',14,'location','northwest'); legend boxoff
+legend({'n_{fs}';'cos(shear)v_{sw,||}';'cos(shear)v_{fs,||}';'sin(shear)v_{fs,\perp}';'125/180\phi'},'fontsize',14,'location','northwest'); legend boxoff
 % ylim([0 2])
 xlim([4 8]); ylim([0.0 2.5])
 % legend('location','southeast')
@@ -1164,7 +1900,238 @@ grid on
 fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','modelvsExpSlope');
 print(gcf,'-dpng','-r300','-loose',fileNamePNG);
 
+%% Model Jy vs Real Jy
+slopeofExpOverModel_nfs = [];
+slopeofExpOverModel_Ma = [];
+slopeofExpOverModel_vfspara = [];
+slopeofExpOverModel_vfsthermal = [];
+slopeofExpOverModel_shear = [];
+shearCoeff = 125/180;
+Times = [8:16];
+for cutTime =Times
+x_nfs = [...
+    calculateModelJy(0.025, 20, 10, 90, 08,cutTime./2);...
+    calculateModelJy(0.045, 20, 10, 90, 08,cutTime./2);...
+    calculateModelJy(0.060, 20, 10, 90, 08,cutTime./2);...
+    calculateModelJy(0.080, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.105, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.140, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.165, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.180, 20, 10, 90, 08,cutTime./2)];
+ 
+ 
+x_Ma= [...
+     calculateModelJy(0.120, 20, 06, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 08, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 12, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 14, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 16, 90, 08,cutTime./2)...
+%      calculateModelSpeed(0.120, 12, 06, sind(2/3*090), 08,cutTime./2);...
+%      calculateModelSpeed(0.120, 16, 08, sind(2/3*090), 08,cutTime./2);...
+%      calculateModelSpeed(0.120, 20, 10, sind(2/3*090), 08,cutTime./2);...
+%      calculateModelSpeed(0.120, 24, 12, sind(2/3*090), 08,cutTime./2);...
+%      calculateModelSpeed(0.120, 28, 14, sind(2/3*090), 08,cutTime./2);...
+%      calculateModelSpeed(0.120, 32, 16, sind(2/3*090), 08,cutTime./2)...
+];
+%  
+x_vfspara = [...
+     calculateModelJy(0.120, 09, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 12, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 16, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 24, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 28, 10, 90, 08,cutTime./2)];
+ 
+x_vfsthermal= [... 
+     calculateModelJy(0.120, 20, 10, 90, 02,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 04,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 05,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 06,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 07,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 09,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 10,cutTime./2)];
+     
+x_shear= [... 
+     calculateModelJy(0.120, 20, 10, 15, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 30, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 45, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 60, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 75, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 90, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 105, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 120, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 135, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 150, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 165, 08,cutTime./2);...
+     calculateModelJy(0.120, 20, 10, 180, 08,cutTime./2)];
 
+y_nfs = [...
+     fs25.maxJy;...
+     fs45.maxJy;...
+      fs6.maxJy;...
+      fs8.maxJy;...
+    fs105.maxJy;...
+     fs12.maxJy;...
+     fs14.maxJy;...
+    fs165.maxJy;...
+     fs18.maxJy];
+y_Ma = [... 
+     SWv6.maxJy;...
+     SWv8.maxJy;...
+    SWv12.maxJy;...
+    SWv14.maxJy;...
+    SWv16.maxJy...
+%        M6.maxU(cutTime,:);...
+%        M8.maxU(cutTime,:);...
+%       M10.maxU(cutTime,:);...
+%       M12.maxU(cutTime,:);...
+%       M14.maxU(cutTime,:);...
+%       M16.maxU(cutTime,:)...
+];
+
+y_vfspara = [...
+    FSv09.maxJy;...
+    FSv12.maxJy;...
+    FSv16.maxJy;...
+    FSv20.maxJy;...
+    FSv24.maxJy;...
+    FSv28.maxJy];
+
+y_vfsthermal = [...
+    fsT2.maxJy;...
+    fsT4.maxJy;...
+    fsT5.maxJy;...
+    fsT6.maxJy;...
+    fsT7.maxJy;...
+    fsT8.maxJy;...
+    fsT9.maxJy;...
+    fsT10.maxJy];
+
+y_shear = [...    
+      d15.maxJy;...
+      d30.maxJy;...
+      d45.maxJy;...
+      d60.maxJy;...
+      d75.maxJy;...
+      d90.maxJy;...
+     d105.maxJy;...
+     d120.maxJy;...
+     d135.maxJy;...
+     d150.maxJy;...
+     d165.maxJy;...
+     d180.maxJy];
+ 
+P_nfs = polyfit(x_nfs,y_nfs,1);
+slopeofExpOverModel_nfs = [slopeofExpOverModel_nfs,P_nfs(1)];
+
+P_Ma = polyfit(x_Ma,y_Ma,1);
+slopeofExpOverModel_Ma = [slopeofExpOverModel_Ma,P_Ma(1)];
+
+P_vfspara = polyfit(x_vfspara,y_vfspara,1);
+slopeofExpOverModel_vfspara = [slopeofExpOverModel_vfspara,P_vfspara(1)];
+
+P_vfsthermal = polyfit(x_vfsthermal,y_vfsthermal,1);
+slopeofExpOverModel_vfsthermal = [slopeofExpOverModel_vfsthermal,P_vfsthermal(1)];
+
+P_shear = polyfit(x_shear,y_shear,1);
+slopeofExpOverModel_shear = [slopeofExpOverModel_shear,P_shear(1)];
+
+
+if cutTime == 12
+    %plotting
+    
+    figure; set(gcf,'color','w'); axis square
+    scatter(x_nfs,y_nfs,100,'filled'); hold on; grid on;xlim([0 4]); ylim([0 4])
+    xLimits = xlim; x1 = linspace(xLimits(1),xLimits(2)); y1 = polyval(P_nfs,x1);
+    plot(x1,y1); 
+    xlabel('Model Speed [V_A]','fontsize',14); ylabel('Expansion Speed [V_A]','fontsize',14)
+    yL = get(gca,'YLim'); xL = get(gca,'XLim'); text(xL(1)+xL(2)/100, yL(2)*99/100,sprintf('m=%1.2f',P_nfs(1)),'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+    title('Expansion Speed vs Model Speed for n_{fs} at t=6 \Omega_i','fontsize',14)
+    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','ExpSpeedvsModelSpeed_nfs'); print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+    
+    figure; set(gcf,'color','w');
+    scatter(x_Ma,y_Ma,100,'filled'); hold on; grid on; xlim([0 4]); ylim([0 4])
+    xLimits = xlim; x1 = linspace(xLimits(1),xLimits(2)); y1 = polyval(P_Ma,x1);
+    plot(x1,y1)
+    xlabel('Model Speed [V_A]','fontsize',14); ylabel('Expansion Speed [V_A]','fontsize',14)
+    yL = get(gca,'YLim'); xL = get(gca,'XLim'); text(xL(1)+xL(2)/100, yL(2)*99/100,sprintf('m=%1.2f',P_Ma(1)),'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+    title('Expansion Speed vs Model Speed for v_{sw,||} at t=6 \Omega_i','fontsize',14)
+    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','ExpSpeedvsModelSpeed_Ma'); print(gcf,'-dpng','-r300','-loose',fileNamePNG); 
+    
+    figure; set(gcf,'color','w');
+    scatter(x_vfspara,y_vfspara,100,'filled'); hold on; grid on; xlim([0 4]); ylim([0 4])
+    xLimits = xlim; x1 = linspace(xLimits(1),xLimits(2)); y1 = polyval(P_vfspara,x1);
+    plot(x1,y1)
+    xlabel('Model Speed [V_A]','fontsize',14); ylabel('Expansion Speed [V_A]','fontsize',14)
+    yL = get(gca,'YLim'); xL = get(gca,'XLim'); text(xL(1)+xL(2)/100, yL(2)*99/100,sprintf('m=%1.2f',P_vfspara(1)),'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+    title('Expansion Speed vs Model Speed for v_{fs,||} at t=6 \Omega_i','fontsize',14)
+    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','ExpSpeedvsModelSpeed_vfspara'); print(gcf,'-dpng','-r300','-loose',fileNamePNG); 
+    
+    figure; set(gcf,'color','w');
+    scatter(x_vfsthermal,y_vfsthermal,100,'filled'); hold on; grid on; xlim([0 4]); ylim([0 4])
+    xLimits = xlim; x1 = linspace(xLimits(1),xLimits(2)); y1 = polyval(P_vfsthermal,x1);
+    plot(x1,y1)
+    xlabel('Model Speed [V_A]','fontsize',14); ylabel('Expansion Speed [V_A]','fontsize',14)
+    yL = get(gca,'YLim'); xL = get(gca,'XLim'); text(xL(1)+xL(2)/100, yL(2)*99/100,sprintf('m=%1.2f',P_vfsthermal(1)),'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+    title('Expansion Speed vs Model Speed for v_{fs,\perp} at t=6 \Omega_i','fontsize',14)
+    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','ExpSpeedvsModelSpeed_vfsthermal'); print(gcf,'-dpng','-r300','-loose',fileNamePNG); 
+    
+    figure; set(gcf,'color','w');
+    scatter(x_shear,y_shear,100,'filled'); hold on; grid on; xlim([0 4]); ylim([0 4])
+    xLimits = xlim; x1 = linspace(xLimits(1),xLimits(2)); y1 = polyval(P_shear,x1);
+    plot(x1,y1)
+    xlabel('Model Speed [V_A]','fontsize',14); ylabel('Expansion Speed [V_A]','fontsize',14)
+    yL = get(gca,'YLim'); xL = get(gca,'XLim'); text(xL(1)+xL(2)/100, yL(2)*99/100,sprintf('m=%1.2f',P_shear(1)),'HorizontalAlignment','Left','VerticalAlignment','top', 'FontSize',14)
+    title('Expansion Speed vs Model Speed for sin(125/180\phi) at t=6 \Omega_i','fontsize',14)
+    fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','ExpSpeedvsModelSpeed_shear'); print(gcf,'-dpng','-r300','-loose',fileNamePNG); 
+end
+
+end
+
+figure
+set(gcf,'color','w');
+scatter(Times./2,slopeofExpOverModel_nfs,100,'filled'); hold on
+scatter(Times./2,slopeofExpOverModel_Ma,100,'filled')
+scatter(Times./2,slopeofExpOverModel_vfspara,100,'filled')
+scatter(Times./2,slopeofExpOverModel_vfsthermal,100,'filled')
+scatter(Times./2,slopeofExpOverModel_shear,100,'filled')
+xlabel('Time [\Omega_i]','fontsize',14)
+ylabel('Slope of Exp./Model Jy [#]','fontsize',14)
+legend({'n_{fs}';'v_{sw,||}';'v_{fs,||}';'v_{fs,\perp}';'125/180\phi'},'fontsize',14,'location','northwest'); legend boxoff
+% ylim([0 2])
+xlim([4 8]); ylim([0.0 2.5])
+% legend('location','southeast')
+title('Slope of Exp/Model Jy vs Time','fontsize',16)
+grid on
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','modelvsExpSlope_Jy');
+print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+
+
+
+%%  n 
+figure
+set(gcf,'color','w');
+plot(fs25.n(20,:)./n0,'linewidth',2,'displayname','2%'); hold on
+plot(fs45.n(20,:)./n0,'linewidth',2,'displayname','4%'); 
+plot(fs6.n(20,:)./n0,'linewidth',2,'displayname','6%'); 
+plot(fs9.n(20,:)./n0,'linewidth',2,'displayname','9%'); 
+plot(fs12.n(20,:)./n0,'linewidth',2,'displayname','12%'); 
+plot(fs15.n(20,:)./n0,'linewidth',2,'displayname','15%'); 
+plot(fs18.n(20,:)./n0,'linewidth',2,'displayname','18%'); 
+xlabel('Z [c/\Omega_i]','fontsize',14)
+ylabel('n [n0]','fontsize',14)
+% legend({'n_{fs}';'v_{sw,||}';'v_{fs,||}';'v_{fs,\perp}';'125/180\phi'},'fontsize',14,'location','northwest'); legend boxoff
+% ylim([0 2])
+% xlim([4 8]); ylim([0.0 2.5])
+xlim([151 249])
+% legend('location','southeast')
+title('n vs z at x=160 c/\Omega_i and t=10 \Omega_i','fontsize',16)
+legend('Location','Northwest')
+grid on
+fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','nvsZposition');
+print(gcf,'-dpng','-r300','-loose',fileNamePNG);
 
 %% Functions
 function [modelSpeed] = calculateModelSpeed(nfs_setup,fsSpeed_setup,swSpeed_setup,shear_setup,fsThermal_setup,time)
@@ -1229,10 +2196,54 @@ modelSpeed = time * nfs_setup * (0.19731*shear_setup*fsSpeed_setup +...
 
 
 %125/180 shear, only lienar terms 8:16, updated 11/2, with y-intercept
-modelSpeed = time * nfs_setup * ( 0.20464*shear_setup*fsSpeed_setup +...
-    -0.30281*shear_setup*swSpeed_setup +...
-    0.33821*fsThermal_setup +...
-    -0.81734);
+modelSpeed = time * nfs_setup * ( 0.19338*sind(125/180*shear_setup)*fsSpeed_setup +...
+    -0.26091*sind(125/180*shear_setup)*swSpeed_setup +...
+    0.35073*fsThermal_setup +...
+    -0.99276);
+
+
+
+% %125/180 shear, with cos(shear)*vperp, updated 3/10/2022, with y-intercept,
+% %with Solar wind Frame
+% modelSpeed = time * nfs_setup * ( 0.2459*sind(125/180*shear_setup)*fsSpeed_setup +...
+%    -0.15756*sind(125/180*shear_setup)*swSpeed_setup +...
+%     0.1414*cosd(125/180*shear_setup)*fsThermal_setup +...
+%     -0.63415);
+% % 
+%125/180 shear, with cos(shear)*vperp, updated 3/10/2022, with y-intercept,
+%with Solar wind Frame cos/2
+modelSpeed = time * nfs_setup * ( 0.21265*sind(125/180*shear_setup)*fsSpeed_setup +...
+   -0.23251*sind(125/180*shear_setup)*swSpeed_setup +...
+    0.32486*cosd(125/180*shear_setup/2)*fsThermal_setup +...
+    -0.96347);
+
+
+%125/180 shear, with cos(shear)*vperp, updated 3/10/2022, with y-intercept,
+%with Solar wind Frame sin
+modelSpeed = time * nfs_setup * ( 0.17187*sind(125/180*shear_setup)*fsSpeed_setup +...
+   -0.31243*sind(125/180*shear_setup)*swSpeed_setup +...
+    0.44585*sind(125/180*shear_setup)*fsThermal_setup +...
+    -0.49826);
+
+
+
+%125/180 shear, with cos(shear)*vperp, updated 3/10/2022, with y-intercept,
+%with Solar wind Frame sinvperp, cosvpara
+modelSpeed = time * nfs_setup * ( 0.34092*cosd(125/180*shear_setup)*fsSpeed_setup +...
+   -0.60184*cosd(125/180*shear_setup)*swSpeed_setup +...
+    0.47083*sind(125/180*shear_setup)*fsThermal_setup +...
+    -0.68102);
+end
+function [modelSpeed] = calculateModelJy(nfs_setup,fsSpeed_setup,swSpeed_setup,shear_setup,fsThermal_setup,time)
+
+
+% %125/180 shear, with cos(shear)*vperp, updated 3/10/2022, with y-intercept,
+% %with Solar wind Frame
+modelSpeed = nfs_setup * ( 0.095261*sind(125/180*shear_setup)*fsSpeed_setup +...
+   0.13513*sind(125/180*shear_setup)*swSpeed_setup +...
+    0.081879*cosd(125/180*shear_setup)*fsThermal_setup +...
+    +0.05873);
+% 
 
 end
 
@@ -1320,6 +2331,8 @@ function [Run] = getCompressionProperties(outputFolder,dt,outputSteps,time,xcut,
 %Load the data for the Run
 timeFrame = time/(dt*outputSteps);
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
+% outputDirectory = strcat('/import/archive/DAYSIDE/atvu/Run',outputFolder);
+
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
@@ -1540,13 +2553,29 @@ for i=1:timeFrame
     
     Jperpx_mixed = delta_mixed_perpx(2:end-1,2:end-1) + delta_electron_perpx_mixed(2:end-1,2:end-1);
     Jperpy_mixed = delta_mixed_perpy(2:end-1,2:end-1) + delta_electron_perpy_mixed(2:end-1,2:end-1);
-    
-
+      %% %Calculate max vaues and positions of Jperp and density
+        del_Jperp = (Jperpx_mixed.^2 + Jperpy_mixed.^2).^(1/2);
+        
+        [max_del_Jperp, max_del_Jperp_pos] = max(del_Jperp(:,xcut));
+        maxJperp(i,:)=max_del_Jperp;
+        maxJperpPos(i,:)=max_del_Jperp_pos;
+        
+        ndelta = ndata_interp-ndata_interp0;
+        ndelta_aboveTD = ndelta;
+        ndelta_aboveTD(1:nz/2-10) = NaN;
+        [max_ndelta,max_ndelta_pos] = max(ndelta_aboveTD);
+        maxN(i,:)=max_ndelta;
+        maxNPos(i,:)=max_ndelta_pos;
+        
+%%
     if i > timeStart
 
         del_Jperpx = ( max(abs(Jperpx_mixed(:,xcut))) - max(abs(Jperpx_mixed_previous(:,xcut))) );% ./ (( max(abs(Jperpx_mixed(:,xcut))) + max(abs(Jperpx_mixed_previous(:,xcut))) )./2);
         del_Jperpy = ( max(abs(Jperpy_mixed(:,xcut))) - max(abs(Jperpy_mixed_previous(:,xcut))) );% ./ (( max(abs(Jperpy_mixed(:,xcut))) + max(abs(Jperpy_mixed_previous(:,xcut))) )./2);
 
+        
+     
+         
         if del_Jperpx  > maxdeltaJx
             maxdeltaJx =del_Jperpx;
             maxJxTime = i;
@@ -1765,9 +2794,19 @@ JswdotEallx(i,:) = sum( (((ppx_cold_data_interp(:,:)-pex_cold(:,:)).*10^3 * 10^-
     
     
     [Nmax,~] = max(n_cold_data_interp(:,xcut));
-   
+    [Nmax2,Nmax2Index] = max(n_cold_data_interp((floor(nz/2)-100):floor(nz/2),xcut));
+
     peakN(i,:) = Nmax;
+    peakN2(i,:) = Nmax2;
+    peakN2Index(i,:) = Nmax2Index;
     [Nmax,NmaxIndex] = max(n_cold_data_interp(:,xcut));
+    
+    Jxmin1(i,:) = max(deltaJxdata_interp( (floor(nz/2)-100):(floor(nz/2)-8),xcut));
+    Jxmin2(i,:) = max(deltaJxdata_interp( (floor(nz/2)):(floor(nz/2)+100),xcut));
+    
+    Jymin1(i,:) = max(deltaJydata_interp( (floor(nz/2)-100):(floor(nz/2)-8),xcut));
+    Jymin2(i,:) = max(deltaJydata_interp( (floor(nz/2)):(floor(nz/2)+100),xcut));    
+    
     SWTEmax(i,:) = max(TE_cold(i,:));
     Uzatmax(i) = upz_cold_data_interp(NmaxIndex,xcut);
     
@@ -2106,6 +3145,8 @@ peakArea = 0.5*(sum(n_cold_data_interp(compressionLeft:compressionRight,xcut)) .
 
 Run.n = n;
 Run.peakN = peakN;
+Run.peakN2Index = peakN2Index;
+Run.peakN2 = peakN2;
 Run.peakPos = peakPos;
 Run.expSpeed = expSpeed;
 Run.peakWidth = peakWidth;
@@ -2151,5 +3192,21 @@ Run.vfspara = fsSpeed_setup;
 Run.vswpara = swSpeed_setup;
 Run.shear = sind(2/3*shear_setup);
 Run.vfsperp = fsThermal_setup;
+
+Run.Jxmin1 = Jxmin1;
+Run.Jxmin2 = Jxmin2;
+Run.Jymin1 = Jymin1;
+Run.Jymin2 = Jymin2;
+
+
+
+        
+        
+
+Run.maxJperp = maxJperp;
+Run.maxJperpPos = maxJperpPos;
+
+Run.maxN=maxN;
+Run.maxNPos=maxNPos;
 
 end

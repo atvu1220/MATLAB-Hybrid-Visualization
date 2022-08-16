@@ -3,14 +3,14 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 fig = figure('Position',[ 1 1 750 1500]);
 % fig = figure('Position',[ 1 1 500 1500]);
 
-outputFolder = '222';
+outputFolder = '364';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
-timeSteps =900;
+timeSteps =500;
 
 outputSteps = 25;
 nt=	floor(timeSteps/outputSteps);
@@ -41,7 +41,7 @@ display('n cold loaded')
 [n_mixed_data] = read_Plasma('n_mixed',nt,nx,ny,nz,outputDirectory);
 display('n foreshock loaded')
 
-xcut = 120;%400
+xcut = 150;%400
 zmid = nz/2;
 ddthickness = 24;
 foreshockthickness = 300;
@@ -53,7 +53,8 @@ zrange = [200 - 49, 200 + 49];
 zrange = [nz/2-1 - 99, nz/2-1 + 99];
 
  zrange = [nz/2-1 - 58 nz/2-1 + 59]
- 
+ zrange = [151 249]
+
 % zrange = [151 399]
 % zrange = [2 nz-2]
 % zrange = [ 201 399]

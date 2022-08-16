@@ -1,7 +1,7 @@
 %Plots Position Data of particles
 clear all
 close all
-outputFolder = '337';
+outputFolder = '366';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
@@ -9,8 +9,8 @@ int='int32';real='float32';
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
 % nt=5%floor(3596/10)
-timeSteps = 25
-outputSteps = 1*25; %output steps,m, in maind.f90 for each frame of pos and vel data
+timeSteps = 250
+outputSteps = 10*25; %output steps,m, in maind.f90 for each frame of pos and vel data
 
 
 nt=	floor(timeSteps/outputSteps)
@@ -27,23 +27,23 @@ nmax = 2000000;%400000;%250000;%3500000;%number of particles Ni_max
 mixed_betaRatio = 1/50;
 
 %Grid
-oneCelllength=101.649992187500*0.5;
+oneCelllength=101.649992187500*0.5*2;
 [XX,ZZ] = meshgrid(0:1:nx-1,0:1:nz-1);
 xDir='Y';
 yDir='Z';
 
 %Desired Cell
 xSC = 3*60*[1,1,1,1,1];%%10+[20,40,60,80];
-xSC = 199;
+xSC = 195;
 TDthickness = 3;
-FSbeamthickness = 190;
+FSbeamthickness = 150;
 % zSC = [nz/2 - TDthickness - FSbeamthickness/2 , nz/2, nz/2 + TDthickness + FSbeamthickness/2]-1;
 zSC = [nz/2 + 1*TDthickness,nz/2 - TDthickness ,nz/2 - 2*TDthickness, nz/2 - 4*TDthickness ]-1;
 % zSC = [nz/2 - TDthickness,nz/2 - TDthickness,nz/2 - TDthickness,nz/2 - TDthickness]
 % zSC = [nz/2 + 10, nz/2 + 20, nz/2 + 30, nz/2 + 40]
 zSC = -100+ [nz/2 + 2*TDthickness,nz/2 + 1*TDthickness ,nz/2 , nz/2 - 1*TDthickness, nz/2 - 2*TDthickness ]-1;
-zSC = 100;
-neighboring = 1;
+zSC = 180;
+neighboring = 3;
 
 
 

@@ -3,14 +3,14 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 fig = figure('Position',[ 1 1 750 1500]);
 % fig = figure('Position',[ 1 1 500 1500]);
 
-outputFolder = '325';
+outputFolder = '364';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
-timeSteps = 1200;
+timeSteps = 500;
 
 outputSteps = 25;
 nt=	floor(timeSteps/outputSteps);
@@ -32,7 +32,9 @@ display('T loaded')
 display('u loaded')
 [Bdata] = read_Plasma('B',nt,nx,ny,nz,outputDirectory);
 display('B loaded')
-%[Edata] = read_Plasma('E',nt,nx,ny,nz,outputDirectory);
+[Edata] = read_Plasma('E',nt,nx,ny,nz,outputDirectory);
+display('E loaded')
+
 [Jdata] = read_Plasma('Current',nt,nx,ny,nz,outputDirectory);
 display('J loaded')
 %[nFSdata] = read_Plasma('Foreshock',nt,nx,ny,nz,outputDirectory);
@@ -41,7 +43,12 @@ display('n cold loaded')
 [n_mixed_data] = read_Plasma('n_mixed',nt,nx,ny,nz,outputDirectory);
 display('n foreshock loaded')
 
-xcut = 120;%400
+[temp_cold_data] = read_Plasma('temp_cold',nt,nx,ny,nz,outputDirectory);
+disp('t cold loaded')
+[temp_mixed_data] = read_Plasma('temp_mixed',nt,nx,ny,nz,outputDirectory);
+disp('t foreshock loaded')
+
+xcut = 150%200;% 120;%400
 zmid = nz/2;
 ddthickness = 24;
 foreshockthickness = 300;
@@ -53,7 +60,13 @@ zrange = [200 - 49, 200 + 49];
 zrange = [nz/2-1 - 99, nz/2-1 + 99];
 
  zrange = [nz/2-1 - 58 nz/2-1 + 59]
- 
+ zrange = [2 nz-2]
+ zrange = [51 251]
+ zrange = [301 499]
+ zrange = [201 324]
+ zrange = [151 249]
+
+%  zrange = [101 299]
 % zrange = [151 399]
 %zrange = [2 nz-2]
 % zrange = [ 201 399]
@@ -64,7 +77,7 @@ zrange = [nz/2-1 - 99, nz/2-1 + 99];
 % zrange = [ 152 448]
 moverq=1.0378e-8;
 if pngSlice ==0
-    fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/2d_Hybrid_Foreshock_PaperFig3b_',RunNumber,'_',string(xcut));%,'_100z');
+    fileName = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/2d_Hybrid_Foreshock_PaperFig3_',RunNumber,'_',string(xcut));%,'_100z');
     v = VideoWriter(fileName);
     v.FrameRate= 10;
     open(v);
@@ -75,7 +88,7 @@ end
 %[XX,ZZ] = meshgrid(0:1:nx-1,0:1:nz-1);
 
 plot_width= 1;
-plot_height= 5;
+plot_height= 5+1;
 plot_number = 1;
 
 filterNumber = 1;
@@ -87,7 +100,7 @@ n0 = imgaussfilt(n0,1);
 [Tdata_interp] = interpolate_Data(Tdata,1,1,nx,nz,X,Z,X2,Z2);
 t0 = mean(Tdata_interp(floor(nz-nz/4):nz-1,2:end-1),'all');
 t0 = imgaussfilt(t0,1);
-
+E0 = (5e-9)* va;
 J0 =(5e-9/(moverq))/ (qx(2)-qx(1));
 if pngSlice == 0
     startTime = 1;
@@ -122,6 +135,8 @@ for i=startTime:stepInterval:nt
     else
         ylim([-0.5 1.25])
     end
+%     ylim([-0.25 1.25]) %HFA 200
+     ylim([-0.25 1.5]) %FB 201
 %             ylim([-1 1.5])
 
 %     ylim([-0.25 0.25])
@@ -145,11 +160,12 @@ for i=startTime:stepInterval:nt
     plot(smooth(1+(ndata_interp(:,xcut))),'--k','linewidth',1)
     
     if max(abs(ylim)) > 1.5
-        ylim([0 max(abs(ylim))])
+        ylim([0.5 max(abs(ylim))])
     else
-        ylim([0 1.5])
+        ylim([0.5 1.5])
     end
-    
+%     ylim([0.5 1.5]) %HFA 200
+     ylim([0.0 2.5]) %FB 201
     yyaxis right
     hold on
     plot(smooth((n_mixed_data_interp(:,xcut))),'r','linewidth',1)
@@ -160,13 +176,13 @@ for i=startTime:stepInterval:nt
     
     set(gca,'ycolor','r','yminortick','on')
 %     ylim([0 0.2])
-    if max(abs(ylim)) > 0.2
+    if max(abs(ylim)) > 0.1
         ylim([0 max(abs(ylim))])
     else
-        ylim([0 0.2])
+        ylim([0 0.1])
     end   
 %     ylabel({'\Deltan/n0'},'FontSize',14)
-    
+%     ylim([0 0.05])
     yyaxis left
     set(gca,'ycolor','b')
     hold off
@@ -244,7 +260,7 @@ for i=startTime:stepInterval:nt
 %     end
 
 ylim([-10 15])
-% ylim([-3 11])
+ylim([-3 11])
     set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
     vlegend = legend('vx','vy','vz','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
     
@@ -252,19 +268,72 @@ ylim([-10 15])
 %     plot4 = subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
     axes(ha(4));
     [Tdata_interp] = imgaussfilt((interpolate_Data(Tdata,1,i,nx,nz,X,Z,X2,Z2))./t0,filterNumber);
-    plot(smooth(Tdata_interp(:,xcut)),'linewidth',1.5)
+    [temp_cold_data_interp] = imgaussfilt((interpolate_Data(temp_cold_data,1,i,nx,nz,X,Z,X2,Z2))./t0,filterNumber);
+    [temp_mixed_data_interp] = imgaussfilt((interpolate_Data(temp_mixed_data,1,i,nx,nz,X,Z,X2,Z2))./t0,filterNumber);
+    temp_mixed_data_interp(n_mixed_data_interp < 0.0025) = NaN;
+     
+%     temp_mixed_data(~isnan(temp_mixed_data)) = smooth(temp_mixed_data(~isnan(temp_mixed_data)));
+    
+    yyaxis left
+    plot(smooth(temp_cold_data_interp(:,xcut)),'b','linewidth',1)
+    set(gca,'ycolor','b','yminortick','on')
     ylabel({'T/T0'},'FontSize',14)
-    if max(abs(ylim)) > 150
+    ylim
+    if max(abs(ylim)) > 1
         ylim([0 max(abs(ylim))])
     else
-        ylim([0 150])
+        ylim([0 1])
     end
-%     ylim([0 100])
+    ylim
+%         ylim([0 1.3]) %HFA 200
+        ylim([0 2.15]) %FB 201
+    yyaxis right
+    plot((temp_mixed_data_interp(:,xcut)),'-r','linewidth',1); hold on
+    plot(smooth(Tdata_interp(:,xcut)),'--k','linewidth',1); hold on
+    
+    set(gca,'ycolor','r','yminortick','on')
+    if max(abs(ylim)) > 50
+    ylim([0 max(abs(ylim))])
+    else
+        ylim([0 50])
+    end
+%     ylim([0 80]) %HFA 200
+         ylim([0 125]) %FB 201
+    %     ylim([0 100])
+    yyaxis left
+%     ylim([0 1.25])
     xlim(zrange)
     set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
+        Tlegend = legend('sw','fs','total','Location','southwest','Orientation','horizontal','fontsize',12); legend('boxoff')
+
+        
+    axes(ha(5));
+    hold on
+    [Exdata_interp] = moverq.*imgaussfilt(((interpolate_Data(Edata,1,i,nx,nz,X,Z,X2,Z2))-0*(interpolate_Data(Edata,1,1,nx,nz,X,Z,X2,Z2)))./E0,filterNumber+1);%.*ndata_interp.*alpha.*n0;
+    [Eydata_interp] = moverq.*imgaussfilt(((interpolate_Data(Edata,2,i,nx,nz,X,Z,X2,Z2))-0*(interpolate_Data(Edata,2,1,nx,nz,X,Z,X2,Z2)))./E0,filterNumber+1);%.*ndata_interp.*alpha.*n0;
+    [Ezdata_interp] = moverq.*imgaussfilt((interpolate_Data(Edata,3,i,nx,nz,X,Z,X2,Z2))./E0,filterNumber+1);%.*ndata_interp.*alpha.*n0;
+    hold off
+    plot(smooth(Exdata_interp(:,xcut)),'b','linewidth',1)
+    hold on
+    plot(smooth(Eydata_interp(:,xcut)),'g','linewidth',1)
+    plot(smooth(Ezdata_interp(:,xcut)),'r','linewidth',1)
+    hold off
+    ylabel({'E/E0'},'FontSize',14)
+    xlim(zrange)
+    if max(abs(ylim)) > 3
+        ylim([-max(abs(ylim)) max(abs(ylim))])
+    else
+        ylim([-3 3])
+    end 
+%     ylim([-5 5]) %HFA 200
+     ylim([-10 10]) %FB 201
+    set(gca,'xminortick','on','yminortick','on','linewidth',1.5,'XTickLabel',[])
+    xlabel({'Z','[\lambda_i]'},'FontSize',14)
+    Elegend = legend('Ex','Ey','Ez','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
+    
     
 %     plot5 = subplot(plot_height,plot_width,plot_number); plot_number = plot_number+1;
-    axes(ha(5));
+    axes(ha(5+1));
     hold on
     [Jxdata_interp] = imgaussfilt(((interpolate_Data(Jdata,1,i,nx,nz,X,Z,X2,Z2))-0*(interpolate_Data(Jdata,1,1,nx,nz,X,Z,X2,Z2)))./J0,filterNumber+1);%.*ndata_interp.*alpha.*n0;
     [Jydata_interp] = imgaussfilt(((interpolate_Data(Jdata,2,i,nx,nz,X,Z,X2,Z2))-0*(interpolate_Data(Jdata,2,1,nx,nz,X,Z,X2,Z2)))./J0,filterNumber+1);%.*ndata_interp.*alpha.*n0;
@@ -282,6 +351,8 @@ ylim([-10 15])
     else
         ylim([-.025 .025])
     end
+%     ylim([-0.025 0.025]) %HFA 200
+     ylim([-0.15 0.15]) %FB 201
     set(gca,'xminortick','on','yminortick','on','linewidth',1.5)
     xlabel({'Z','[\lambda_i]'},'FontSize',14)
     Jlegend = legend('Jx','Jy','Jz','Bot','Location','northwest','Orientation','horizontal','fontsize',12); legend('boxoff')
@@ -303,13 +374,15 @@ ylim([-10 15])
     if i==pngSlice
         fileNamePNG = strcat('/import/c1/DAYSIDE/atvu/Runs/Paper3/','1D_Run',RunNumber,'_t',string(pngSlice));
         
-        print(gcf,'-dpng','-r300','-loose',fileNamePNG);
+         print(gcf,'-dpng','-r300','-loose',fileNamePNG);
     end
     
     delete(h)
     delete(Blegend)
     delete(nlegend)
     delete(vlegend)
+    delete(Tlegend)
+    delete(Elegend)
         delete(Jlegend)
         delete(ha)
 %     delete(plot1)
