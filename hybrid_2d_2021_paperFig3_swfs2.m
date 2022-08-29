@@ -3,14 +3,14 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 % fig = figure('Position',[ 1 1 750 1500]);
 fig = figure('Position',[ 1 1 500 1500]);
 
-outputFolder = '381';
+outputFolder = '406';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
-timeSteps = 1000;
+timeSteps = 473;
 
 outputSteps = 25;
 nt=	floor(timeSteps/outputSteps);

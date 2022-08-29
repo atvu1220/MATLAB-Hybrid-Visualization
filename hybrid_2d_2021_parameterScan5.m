@@ -1109,7 +1109,21 @@ print(gcf,'-dpng','-r300','-loose',fileNamePNG);
 P = polyfit(nfs,u,1);
 vpara_slope = [vpara_slope,P(1)];
 end
+%% vexp vs time
+figure; 
+figure; set(gcf,'color','w');
+plot([0.5:0.5:16],FSv09.maxU./va,'linewidth',2); 
+hold on; 
+plot([0.5:0.5:16],FSv12.maxU./va,'linewidth',2); 
+plot([0.5:0.5:16],FSv16.maxU./va,'linewidth',2); 
+plot([0.5:0.5:16],FSv20.maxU./va,'linewidth',2); 
+plot([0.5:0.5:16],FSv24.maxU./va,'linewidth',2); 
+plot([0.5:0.5:16],FSv28.maxU./va,'linewidth',2);
 
+legend({'9 V_A'; '12 V_A'; '16 V_A'; '20 V_A'; '24 V_A'; '28 V_A'},'location','northwest')
+ylabel('V_exp [V_A]','fontsize',14)
+xlabel('FS V para [V_A]','fontsize',14)
+title('FS V para vs. V_exp','fontsize',14)
 %% FSvperp
 [Time,Slope_fsvperp] = calculateSlopeperTime(....
     [2,3,4,5,6,7,8,9,10],...

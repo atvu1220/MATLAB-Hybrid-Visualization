@@ -3,14 +3,14 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 % fig = figure('Position',[ 1 1 750 1500]);
 fig = figure('Position',[ 1 1 500 1500]);
 
-outputFolder = '382';
+outputFolder = '406';
 outputDirectory = strcat('/import/c1/DAYSIDE/atvu/Run',outputFolder);
 %cd(outputDirectory)
 RunNumber= outputFolder;
 
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
-timeSteps = 1000;
+timeSteps = 328;
 
 outputSteps = 25;
 nt=	floor(timeSteps/outputSteps);
@@ -71,6 +71,7 @@ zrange = [nz/2-1 - 99, nz/2-1 + 99];
 zrange = [151 249]
 
 zrange = [2 nz-1]
+zrange = [101 299]
 %  zrange = [301 499]
 %  zrange = [2 nz-3]
 %  zrange = [152 448]
@@ -134,9 +135,9 @@ for i=startTime:stepInterval:nt
     ylabel({'B/B0'},'FontSize',14)
     xlim(zrange)
     if max(abs(ylim)) > 1.25
-        ylim([-0.25 max(abs(ylim))])
+        ylim([-1 max(abs(ylim))])
     else
-        ylim([-0.25 1.25])
+        ylim([-1.0 1.25])
     end
 %             ylim([-1 1.5])
 
