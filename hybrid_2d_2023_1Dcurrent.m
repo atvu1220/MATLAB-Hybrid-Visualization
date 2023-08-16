@@ -5,10 +5,8 @@ A = [0,0.447058826684952,0.741176486015320;0.00787401571869850,0.451412707567215
 %particle reverses direction it is always considered as a "foreshock"
 %particle in the hybrid code.
 %2/6/2023
-outputFolder = '34';
+outputFolder = '29';
 outputDirectory = strcat('/home/andrew/Documents/Run',outputFolder);
-outputDirectory = strcat('/media/andrew/Hybrid Runs/Run', outputFolder);
-
 
 RunNumber= outputFolder;
 int='int32';real='float32';
