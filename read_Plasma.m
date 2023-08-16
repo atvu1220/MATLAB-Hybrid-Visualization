@@ -56,8 +56,18 @@ function [f2] = read_Plasma(Plasma,nt,nx,ny,nz,outputDirectory)
         case 'ue'
             fileName = '/c.ue.dat';
             col=3;            
-            
-
+        case 'n_cold_foreshock'
+            fileName = '/c.np_cold_foreshock.dat';
+            col=1;
+        case 'n_mixed_foreshock'
+            fileName = '/c.np_mixed_foreshock.dat';
+            col=1;            
+        case 'up_cold_foreshock'
+            fileName = '/c.up_cold_foreshock.dat';
+            col=3;
+        case 'up_mixed_foreshock'
+            fileName = '/c.up_mixed_foreshock.dat';
+            col=3;
     end
     fileName = strcat(outputDirectory,fileName);
     [fid,~]=fopen(fileName,'r','n');

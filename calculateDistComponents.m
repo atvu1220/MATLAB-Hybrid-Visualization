@@ -1,6 +1,6 @@
 function [component] = calculateDistComponents(ParticleInCellVel,ParticleInCellPos,dir,outputSteps,timeSteps,t,outputDirectory)
 % t=10*t;%20*25=500 steps or 10*25 = 250 steps
-t=2*t; %2*25 stepoutput = a frame per 50 steps.
+t=1*t; %2*25 stepoutput = a frame per 50 steps.
 [qx,qy,qz,nt,nx,ny,nz,va] = read_Coordinates(outputDirectory);
 [X,Z,X2,Z2] = scale_Data(qx,qz);
 nt=	floor(timeSteps/25);
@@ -69,7 +69,9 @@ elseif dir == "B"
 %         component = [component;vperp];
 %     end
 elseif dir == "ExB"
-    [up_cold_data] = read_Plasma('up_cold',nt,nx,ny,nz,outputDirectory);
+    %[up_cold_data] = read_Plasma('up_cold',t,nx,ny,nz,outputDirectory);
+        [up_cold_data] = read_Plasma('Momentum',t,nx,ny,nz,outputDirectory);
+
 %     display('u cold loaded')
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
         Bdata = edge_to_center(Bdata);
@@ -90,6 +92,8 @@ elseif dir == "ExB"
         E = - cross([upx_cold_data_interp(partPos(1),partPos(2)),upy_cold_data_interp(partPos(1),partPos(2)),upz_cold_data_interp(partPos(1),partPos(2))],[Bxdata_interp(partPos(1),partPos(2)),Bydata_interp(partPos(1),partPos(2)),Bzdata_interp(partPos(1),partPos(2))]);
         ExB= cross(E,[Bxdata_interp(partPos(1),partPos(2)),Bydata_interp(partPos(1),partPos(2)),Bzdata_interp(partPos(1),partPos(2))])./norm([Bxdata_interp(partPos(1),partPos(2)),Bydata_interp(partPos(1),partPos(2)),Bzdata_interp(partPos(1),partPos(2))]).^2;
         ExB = ExB./norm(ExB);
+        %display(strcat('ExB_x: ',string(ExB(1)),' ExB_y: ',string(ExB(2)),' ExB_z: ',string(ExB(3))))
+
         [vpara,~] = calculate_components(ExB(1),ExB(2),ExB(3),...
             ParticleInCellVel(j,1),ParticleInCellVel(j,2),ParticleInCellVel(j,3));
         component = [component;vpara];
@@ -101,7 +105,9 @@ elseif dir == "ExB"
     
     
 elseif dir == "ExBperp"
-    [up_cold_data] = read_Plasma('up_cold',nt,nx,ny,nz,outputDirectory);
+    %[up_cold_data] = read_Plasma('up_cold',t,nx,ny,nz,outputDirectory);
+        [up_cold_data] = read_Plasma('Momentum',t,nx,ny,nz,outputDirectory);
+
 %     display('u cold loaded')
     [Bdata] = read_Plasma('B',t,nx,ny,nz,outputDirectory);
         Bdata = edge_to_center(Bdata);
@@ -124,6 +130,7 @@ elseif dir == "ExBperp"
         %ExBperp = cross(ExB,[Bxdata_interp(partPos(1),partPos(2)),Bydata_interp(partPos(1),partPos(2)),Bzdata_interp(partPos(1),partPos(2))]);
         ExBperp = cross([Bxdata_interp(partPos(1),partPos(2)),Bydata_interp(partPos(1),partPos(2)),Bzdata_interp(partPos(1),partPos(2))],ExB);
         ExBperp = ExBperp./norm(ExBperp);
+        %display(strcat('ExBperp_x: ',string(ExBperp(1)),' ExBperp_y: ',string(ExBperp(2)),' ExBperp_z: ',string(ExBperp(3))))
         [vpara,~] = calculate_components(ExBperp(1),ExBperp(2),ExBperp(3),...
         ParticleInCellVel(j,1),ParticleInCellVel(j,2),ParticleInCellVel(j,3));
         component = [component;vpara];
